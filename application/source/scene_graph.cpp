@@ -1,5 +1,6 @@
 #include "scene_graph.hpp"
 
+
 std::string SceneGraph::getName() {
   return name;
 }
