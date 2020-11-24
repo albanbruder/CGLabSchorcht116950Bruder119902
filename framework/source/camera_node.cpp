@@ -1,5 +1,11 @@
 #include "camera_node.hpp"
 
+
+CameraNode::CameraNode() {}
+
+CameraNode::CameraNode(std::string name) 
+  : Node{name} {}
+
 bool CameraNode::getPerspective() const {
   return isPerspective;  
 }

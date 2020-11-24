@@ -5,6 +5,7 @@
 #include "shader_loader.hpp"
 #include "model_loader.hpp"
 #include "geometry_node.hpp"
+#include "camera_node.hpp"
 
 #include <glbinding/gl/gl.h>
 // use gl definitions from glbinding 
@@ -23,10 +24,11 @@ using namespace gl;
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
  ,planet_object{}
- ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
+ ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, -15.0f, 10.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
  ,graph{}
 {
+  m_view_transform=glm::rotate(m_view_transform, float(1), glm::fvec3{1.0f, 0.0f, 0.0f});
   initializeObjects();
   initializeGeometry();  
   initializeShaderPrograms();
@@ -41,7 +43,8 @@ ApplicationSolar::~ApplicationSolar() {
 
 void ApplicationSolar::initializeObjects(){
   std::shared_ptr<Node> root = graph.getRoot();
-
+  CameraNode camera = CameraNode("Camera1");;
+  root->addChildren(camera);
   GeometryNode planet1 = GeometryNode("Planet1");
   GeometryNode planet2 = GeometryNode("Planet2");
   GeometryNode planet3 = GeometryNode("Planet3");
@@ -52,7 +55,7 @@ void ApplicationSolar::initializeObjects(){
   GeometryNode planet8 = GeometryNode("Planet8");
   planet1.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   planet2.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  planet2.setLocalTransform(glm::translate(planet2.getLocalTransform(), glm::fvec3{1.0f, 0.0f, 0.0f}));
+  // planet2.setLocalTransform(glm::translate(planet2.getLocalTransform(), glm::fvec3{1.0f, 0.0f, 0.0f}));
   planet3.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   planet4.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   planet5.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
@@ -61,6 +64,7 @@ void ApplicationSolar::initializeObjects(){
   planet8.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   root->addChildren(planet1);
   root->addChildren(planet2);
+  root->addChildren(planet3);
   
 
 }
@@ -68,10 +72,20 @@ void ApplicationSolar::initializeObjects(){
 void ApplicationSolar::render() const {
   
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+    float radius = -1.0f;
+
+    if (planet->getName() == "Planet2") {
+      radius = -3.0f;
+    }
+    
+    if (planet->getName() == "Planet3") {
+      radius = -5.0f;
+    }
+
     // bind shader to upload uniforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
-    planet->setLocalTransform(glm::rotate(planet->getLocalTransform(), float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
-    planet->setLocalTransform(glm::translate(planet->getLocalTransform(), glm::fvec3{0.0f, 0.0f, -1.0f}));
+    //planet->setLocalTransform(glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+    planet->setLocalTransform(glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, radius}));
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(planet->getLocalTransform()));
 

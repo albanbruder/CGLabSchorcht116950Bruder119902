@@ -1,5 +1,7 @@
 #include "geometry_node.hpp"
 
+GeometryNode::GeometryNode() {}
+
 GeometryNode::GeometryNode(std::string name) 
   : Node{name} {}
 

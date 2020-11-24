@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+Node::Node() {}
+
 Node::Node(std::string nodeName) {
   name = nodeName;
 }

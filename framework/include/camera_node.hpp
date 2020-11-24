@@ -3,9 +3,12 @@
 
 #include <memory>
 #include <glm/matrix.hpp>
+#include <string>
 
-class CameraNode {
+class CameraNode : public Node {
   public:
+    CameraNode();
+    CameraNode(std::string name);
     bool getPerspective() const;
     bool getEnabled() const;
     void setEnabled(bool enabled);
