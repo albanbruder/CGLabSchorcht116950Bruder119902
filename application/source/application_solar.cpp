@@ -24,7 +24,7 @@ using namespace gl;
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
  ,planet_object{}
- ,m_view_transform{glm::rotate(glm::translate(glm::fmat4{}, glm::fvec3{0.0f, -15.0f, 10.0f}), float(1), glm::fvec3{1.0f, 0.0f, 0.0f})}
+ ,m_view_transform{glm::rotate(glm::translate(glm::fmat4{}, glm::fvec3{0.0f, -40.0f, 10.0f}), float(1), glm::fvec3{1.0f, 0.0f, 0.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
  ,graph{}
 {
@@ -54,7 +54,6 @@ void ApplicationSolar::initializeObjects(){
   GeometryNode planet8 = GeometryNode("Planet8");
   planet1.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   planet2.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  // planet2.setLocalTransform(glm::translate(planet2.getLocalTransform(), glm::fvec3{1.0f, 0.0f, 0.0f}));
   planet3.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   planet4.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   planet5.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
@@ -64,6 +63,11 @@ void ApplicationSolar::initializeObjects(){
   root->addChildren(planet1);
   root->addChildren(planet2);
   root->addChildren(planet3);
+  root->addChildren(planet4);
+  root->addChildren(planet5);
+  root->addChildren(planet6);
+  root->addChildren(planet7);
+  root->addChildren(planet8);
   
 
 }
@@ -72,13 +76,31 @@ void ApplicationSolar::render() const {
   
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
     float radius = -1.0f;
-
-    if (planet->getName() == "Planet2") {
+    
+    
+    if (planet->getName() == "Planet1") {
       radius = -3.0f;
     }
-    
-    if (planet->getName() == "Planet3") {
-      radius = -5.0f;
+    else if (planet->getName() == "Planet2") {
+      radius = -8.0f;
+    }
+    else if (planet->getName() == "Planet3") {
+      radius = -14.0f;
+    }
+    else if (planet->getName() == "Planet4") {
+      radius = -20.0f;
+    }
+    else if (planet->getName() == "Planet5") {
+      radius = -28.0f;
+    }
+    else if (planet->getName() == "Planet6") {
+      radius = -33.0f;
+    }
+    else if (planet->getName() == "Planet7") {
+      radius = -38.0f;
+    }
+    else if (planet->getName() == "Planet8") {
+      radius = -45.0f;
     }
 
     // bind shader to upload uniforms
