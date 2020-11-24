@@ -24,7 +24,7 @@ std::shared_ptr<Node> Node::getChildren(std::string name) const {
   );
 
   if (it == std::end(children)) {
-    return std::make_shared<Node>(nullptr);
+    return nullptr;
   }
 
   return *it;
@@ -74,7 +74,7 @@ std::shared_ptr<Node> Node::removeChildren(std::string name) {
   );
   
   if (it == std::end(children)) {
-    return std::make_shared<Node>(nullptr);
+    return nullptr;
   }
 
   std::shared_ptr<Node> child = *it;
