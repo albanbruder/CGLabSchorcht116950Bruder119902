@@ -3,8 +3,6 @@
 GeometryNode::GeometryNode(std::string name) 
   : Node{name} {}
 
-GeometryNode::~GeometryNode() {}
-
 std::shared_ptr<model> GeometryNode::getGeometry() const {
   return geometry;
 }

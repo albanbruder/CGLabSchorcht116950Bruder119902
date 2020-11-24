@@ -19,4 +19,3 @@ glm::mat4 CameraNode::getProjectionMatrix() const {
 void CameraNode::setProjectionMatrix(const glm::mat4 &newProjectionMatrix) {
   projectionMatrix = newProjectionMatrix;
 }
-CameraNode::~CameraNode() {}

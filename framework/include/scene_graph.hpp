@@ -1,6 +1,7 @@
 #ifndef SCENE_GRAPH_HPP
 #define SCENE_GRAPH_HPP
 
+#include <memory>
 #include "node.hpp"
 
 class SceneGraph {
