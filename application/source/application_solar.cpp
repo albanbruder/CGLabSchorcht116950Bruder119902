@@ -24,11 +24,10 @@ using namespace gl;
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
  ,planet_object{}
- ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, -15.0f, 10.0f})}
+ ,m_view_transform{glm::rotate(glm::translate(glm::fmat4{}, glm::fvec3{0.0f, -15.0f, 10.0f}), float(1), glm::fvec3{1.0f, 0.0f, 0.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
  ,graph{}
 {
-  m_view_transform=glm::rotate(m_view_transform, float(1), glm::fvec3{1.0f, 0.0f, 0.0f});
   initializeObjects();
   initializeGeometry();  
   initializeShaderPrograms();
@@ -44,7 +43,7 @@ ApplicationSolar::~ApplicationSolar() {
 void ApplicationSolar::initializeObjects(){
   std::shared_ptr<Node> root = graph.getRoot();
   CameraNode camera = CameraNode("Camera1");;
-  root->addChildren(camera);
+  //root->addChildren(camera);
   GeometryNode planet1 = GeometryNode("Planet1");
   GeometryNode planet2 = GeometryNode("Planet2");
   GeometryNode planet3 = GeometryNode("Planet3");
@@ -84,8 +83,8 @@ void ApplicationSolar::render() const {
 
     // bind shader to upload uniforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
-    //planet->setLocalTransform(glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
-    planet->setLocalTransform(glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, radius}));
+    planet->setLocalTransform(glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+    planet->setLocalTransform(glm::translate(planet->getLocalTransform(), glm::fvec3{0.0f, 0.0f, radius}));
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(planet->getLocalTransform()));
 
@@ -109,6 +108,7 @@ void ApplicationSolar::uploadView() {
   glm::fmat4 view_matrix = glm::inverse(m_view_transform);
   // upload matrix to gpu
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+    glUseProgram(m_shaders.at(planet->getName()).handle);
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ViewMatrix"),
                       1, GL_FALSE, glm::value_ptr(view_matrix));
   }
@@ -117,6 +117,7 @@ void ApplicationSolar::uploadView() {
 void ApplicationSolar::uploadProjection() {
   // upload matrix to gpu
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+    glUseProgram(m_shaders.at(planet->getName()).handle);
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ProjectionMatrix"),
                       1, GL_FALSE, glm::value_ptr(m_view_projection));
   }
@@ -127,10 +128,12 @@ void ApplicationSolar::uploadUniforms() {
   // bind shader to which to upload unforms
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
     glUseProgram(m_shaders.at(planet->getName()).handle);
+  
+  }
     // upload uniform values to new locations
     uploadView();
     uploadProjection();
-  }
+  
 }
 
 ///////////////////////////// intialisation functions /////////////////////////
