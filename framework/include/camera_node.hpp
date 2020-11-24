@@ -2,6 +2,7 @@
 #define CAMERA_NODE_HPP
 
 #include <memory>
+#include "node.hpp"
 #include <glm/matrix.hpp>
 #include <string>
 
