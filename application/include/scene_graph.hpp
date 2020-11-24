@@ -5,15 +5,16 @@
 
 class SceneGraph {
   public:
-    std::string getName();
-    Node getRoot();
-    std::string printGraph();
+    SceneGraph();
+    std::string getName() const;
+    std::shared_ptr<Node> getRoot() const;
+    std::string printGraph() const;
   
   private:
     void setName(std::string newName);
-    void setRoot(Node newRoot);
+    void setRoot(const Node &newRoot);
     std::string name;
-    Node root;
+    std::shared_ptr<Node> root;
 };
 
 #endif

@@ -3,14 +3,17 @@
 
 #include "node.hpp"
 #include "model.hpp"
+#include <memory>
 
-class GeometryNode: public Node {
+class GeometryNode : public Node {
   public:
-    model getGeometry();
-    void setGeometry(model newGeometry);
+    GeometryNode();
+    GeometryNode(std::string name);
+    std::shared_ptr<model> getGeometry() const;
+    void setGeometry(const model &newGeometry);
   
   private:
-    model geometry;
+    std::shared_ptr<model> geometry;
 };
 
 #endif

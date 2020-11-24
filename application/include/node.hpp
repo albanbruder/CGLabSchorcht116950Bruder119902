@@ -3,34 +3,37 @@
 
 #include <glm/matrix.hpp>
 #include <list>
+#include <string>
+#include <memory>
 
 class Node {
   public:
     // allocate and initialize objects
-    Node* getParent();
-    void setParent(Node newParent);
-    Node* getChildren(std::string newName);
-    std::list<Node> getChildrenList();
-    std::string getName();
-    std::string getPath();
-    int getDepth();
-    glm::mat4 getLocalTransform();
-    void setLocalTransform(glm::mat4 transform);
-    glm::mat4 getWorldTransform();
-    void setWorldTransform(glm::mat4 transform);
-    void addChildren(Node child);
-    Node* removeChildren(std::string);
+    std::shared_ptr<Node> getParent() const;
+    void setParent(const Node &newParent);
+    std::shared_ptr<Node> getChildren(std::string Name) const;
+    std::list<std::shared_ptr<Node>> getChildrenList() const;
+    std::string getName() const;
+    std::string getPath() const;
+    int getDepth() const;
+    glm::mat4 getLocalTransform() const;
+    void setLocalTransform(const glm::mat4 &transform);
+    glm::fmat4 getWorldTransform() const;
+    void setWorldTransform(const glm::mat4 &transform);
+    void addChildren(const Node &child);
+    std::shared_ptr<Node> removeChildren(std::string);
     Node();
-	~Node();
+    Node(std::string name);
+	  ~Node();
   
   private:
-    Node* parent;
-    std::list<Node> children;
+    std::shared_ptr<Node> parent;
+    std::list<std::shared_ptr<Node>> children;
     std::string name;
     std::string path;
     int depth;
     glm::fmat4 localTransform;
-    glm::fmat4 wordTransform;
+    glm::fmat4 worldTransform;
 };
 
 #endif

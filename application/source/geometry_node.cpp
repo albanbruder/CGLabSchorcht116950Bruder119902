@@ -1,9 +1,14 @@
 #include "geometry_node.hpp"
 
-model getGeometry(){
+GeometryNode::GeometryNode(std::string name) 
+  : Node{name} {}
+
+GeometryNode::~GeometryNode() {}
+
+std::shared_ptr<model> GeometryNode::getGeometry() const {
   return geometry;
 }
 
-void setGeometry(model newGeometry){
-  geometry = newGeometry;
+void GeometryNode::setGeometry(const model &newGeometry) {
+  geometry = std::make_shared<model>(newGeometry);
 }

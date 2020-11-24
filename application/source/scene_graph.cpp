@@ -1,22 +1,26 @@
 #include "scene_graph.hpp"
 
 
-std::string SceneGraph::getName() {
+SceneGraph::SceneGraph() {
+  setRoot(Node("root"));
+}
+
+std::string SceneGraph::getName() const {
   return name;
 }
 
-Node getRoot(){
+std::shared_ptr<Node> SceneGraph::getRoot() const {
   return root;
 }
 
-std::string printGraph(){
+std::string SceneGraph::printGraph() const {
   //ToDo in the Future
 }
 
-void setName(std::string newName){
+void SceneGraph::setName(std::string newName) {
   name = newName;
 }
 
-void setRoot(Node newRoot){
-  root = newRoot;
+void SceneGraph::setRoot(const Node &newRoot) {
+  root = std::make_shared<Node>(newRoot);
 }

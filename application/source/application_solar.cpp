@@ -4,7 +4,6 @@
 #include "utils.hpp"
 #include "shader_loader.hpp"
 #include "model_loader.hpp"
-#include "scene_graph.hpp"
 #include "geometry_node.hpp"
 
 #include <glbinding/gl/gl.h>
@@ -26,6 +25,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,planet_object{}
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
+ ,graph{}
 {
   initializeGeometry();
   initializeShaderPrograms();
@@ -37,19 +37,33 @@ ApplicationSolar::~ApplicationSolar() {
   glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
 
+void ApplicationSolar::initializeObjects(){
+  std::shared_ptr<Node> root = graph.getRoot();
+
+  GeometryNode planet1 = GeometryNode("Planet1");
+  planet1.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  planet1.setLocalTransform(glm::fmat4{});
+  planet1.setWorldTransform(glm::fmat4{});
+  root->addChildren(planet1);
+}
+
 void ApplicationSolar::render() const {
   // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
 
-  glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f});
-  model_matrix = glm::translate(model_matrix, glm::fvec3{0.0f, 0.0f, -1.0f});
+  std::shared_ptr<Node> planet1 = graph.getRoot()->getChildren("Planet1");
+
+  // TODO: tranform planet
+
+  /* glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f});
+  model_matrix = glm::translate(model_matrix, glm::fvec3{0.0f, 0.0f, -1.0f}); */
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-                     1, GL_FALSE, glm::value_ptr(model_matrix));
+                     1, GL_FALSE, glm::value_ptr(planet1->getLocalTransform()));
 
   // extra matrix for normal transformation to keep them orthogonal to surface
-  glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+  /* glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix); */
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-                     1, GL_FALSE, glm::value_ptr(normal_matrix));
+                     1, GL_FALSE, glm::value_ptr(planet1->getWorldTransform()));
 
   // bind the VAO to draw
   glBindVertexArray(planet_object.vertex_AO);

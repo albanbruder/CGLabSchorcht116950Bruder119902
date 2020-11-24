@@ -1,21 +1,22 @@
 #include "camera_node.hpp"
 
-std::bool CameraNode::getPerspective(){
+bool CameraNode::getPerspective() const {
   return isPerspective;  
 }
 
-std::bool CameraNode::getEnabled(){
+bool CameraNode::getEnabled() const{
   return isEnabled;
 }
 
-void CameraNode::setEnabled(std::bool enabled) {
-  isEnabled=enabled;
+void CameraNode::setEnabled(bool enabled) {
+  isEnabled = enabled;
 }
 
-glm::mat4 CameraNode::getProjectionMatrix() {
+glm::mat4 CameraNode::getProjectionMatrix() const {
   return projectionMatrix;
 }
 
-void CameraNode::setProjectionMatrix(glm::mat4 newProjectionMatrix) {
-  projectionMatrix=newProjectionMatrix
+void CameraNode::setProjectionMatrix(const glm::mat4 &newProjectionMatrix) {
+  projectionMatrix = newProjectionMatrix;
 }
+CameraNode::~CameraNode() {}

@@ -1,54 +1,85 @@
 #include "node.hpp"
 
-Node Node::getParent() {
-  return parent
+#include <algorithm>
+
+Node::Node(std::string nodeName) {
+  name = nodeName;
 }
 
-void Node::setParent(Node newParent) {
-  parent = newParent;
+Node::~Node() {}
+
+std::shared_ptr<Node> Node::getParent() const {
+  return parent;
 }
 
-Node Node::getChildren(std::string newName) {
-  name = newName;
+void Node::setParent(const Node &newParent) {
+  parent = std::make_shared<Node>(newParent);
 }
 
-std::list<Node> Node::getChildrenList() {
+std::shared_ptr<Node> Node::getChildren(std::string name) const {
+  std::list<std::shared_ptr<Node>>::const_iterator it = std::find_if(
+    std::begin(children),
+    std::end(children),
+    [name](std::shared_ptr<Node> child) { return child->getName() == name; }
+  );
+
+  if (it == std::end(children)) {
+    return std::make_shared<Node>(nullptr);
+  }
+
+  return *it;
+}
+
+std::list<std::shared_ptr<Node>> Node::getChildrenList() const {
   return children;
 }
 
-std::string Node::getName() {
+std::string Node::getName() const {
   return name;
 }
 
-std::string Node::getPath() {
+std::string Node::getPath() const {
   return path;
 }
 
-std::int Node::getDepth() {
+int Node::getDepth() const {
   return depth;
 }
 
-glm::mat4 Node::getLocalTransform() {
+glm::mat4 Node::getLocalTransform() const {
   return localTransform;
 }
 
-void Node::setLocalTransform(glm::mat4 transform) {
+void Node::setLocalTransform(const glm::mat4 &transform) {
   localTransform = transform;
 }
 
-glm::mat4 getWorldTransform() {
+glm::mat4 Node::getWorldTransform() const {
   return worldTransform;
 }
 
-void Node::setWorldTransform(glm::mat4 transform) {
+void Node::setWorldTransform(const glm::mat4 &transform) {
   worldTransform = transform;
 }
 
-void Node::addChildren(Node child) {
-  children.push_back(child);
+void Node::addChildren(const Node &child) {
+  children.push_back(std::make_shared<Node>(child));
 }
 
-Node Node::removeChildren(std::string name) {
-  children.remove_if([child] -> bool { return child.name == name});
+std::shared_ptr<Node> Node::removeChildren(std::string name) {
+  std::list<std::shared_ptr<Node>>::const_iterator it = std::find_if(
+    std::begin(children),
+    std::end(children),
+    [name](std::shared_ptr<Node> child) { return child->getName() == name; }
+  );
+  
+  if (it == std::end(children)) {
+    return std::make_shared<Node>(nullptr);
+  }
+
+  std::shared_ptr<Node> child = *it;
+
+  std::remove(std::begin(children), std::end(children), child);
+  return child;
 }
   

@@ -1,19 +1,22 @@
 #ifndef CAMERA_NODE_HPP
 #define CAMERA_NODE_HPP
 
+#include <memory>
+#include <glm/matrix.hpp>
+
 class CameraNode {
   public:
-    std::bool getPerspective();
-    std::bool getEnabled();
-    void setEnabled(std::bool enabled);
-    glm::mat4 getProjectionMatrix();
-    void setProjectionMatrix(glm::mat4 newProjectionMatrix);
+    bool getPerspective() const;
+    bool getEnabled() const;
+    void setEnabled(bool enabled);
+    glm::mat4 getProjectionMatrix() const;
+    void setProjectionMatrix(const glm::mat4 &newProjectionMatrix);
 
   
   private:
-    std::bool isPerspective;
-    std::bool isEnabled;
-    glm::mat4 projectionMatrix;
+    bool isPerspective;
+    bool isEnabled;
+    glm::fmat4 projectionMatrix;
 
 };
 
