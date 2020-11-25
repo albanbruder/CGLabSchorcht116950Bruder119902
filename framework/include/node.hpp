@@ -25,7 +25,6 @@ class Node {
     glm::fmat4 getWorldTransform() const;
     void setWorldTransform(const glm::mat4 &transform);
     void addChildren(const std::shared_ptr<Node> &child);
-    // std::shared_ptr<GeometryNode> addChildren(const GeometryNode &child);
     std::shared_ptr<Node> removeChildren(std::string);
     Node();
     Node(std::string name);

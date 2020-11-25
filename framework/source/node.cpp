@@ -85,12 +85,6 @@ void Node::addChildren(const std::shared_ptr<Node> &child) {
   children.push_back(child);
 }
 
-/* std::shared_ptr<GeometryNode> Node::addChildren(const GeometryNode &child) {
-  auto ptr = std::make_shared<GeometryNode>(child);
-  children.push_back(std::dynamic_pointer_cast<Node>(ptr));
-  return ptr;
-} */
-
 std::shared_ptr<Node> Node::removeChildren(std::string name) {
   std::list<std::shared_ptr<Node>>::const_iterator it = std::find_if(
     std::begin(children),
