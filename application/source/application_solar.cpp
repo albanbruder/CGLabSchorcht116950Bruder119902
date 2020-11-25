@@ -20,6 +20,8 @@ using namespace gl;
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <memory>
+#include <glm/gtx/string_cast.hpp>
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -44,22 +46,27 @@ void ApplicationSolar::initializeObjects(){
   std::shared_ptr<Node> root = graph.getRoot();
   CameraNode camera = CameraNode("Camera1");;
   //root->addChildren(camera);
-  GeometryNode mercury = GeometryNode("mercury");
-  GeometryNode venus = GeometryNode("venus");
-  GeometryNode earth = GeometryNode("earth");
-  GeometryNode mars = GeometryNode("mars");
-  GeometryNode jupiter = GeometryNode("jupiter");
-  GeometryNode saturn = GeometryNode("saturn");
-  GeometryNode uranus = GeometryNode("uranus");
-  GeometryNode neptun = GeometryNode("neptun");
-  mercury.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  venus.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  earth.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  mars.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  jupiter.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  saturn.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  uranus.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  neptun.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+
+  auto mercury = std::make_shared<GeometryNode>(GeometryNode("mercury"));
+  auto venus = std::make_shared<GeometryNode>(GeometryNode("venus"));
+  auto earth = std::make_shared<GeometryNode>(GeometryNode("earth"));
+  auto mars = std::make_shared<GeometryNode>(GeometryNode("mars"));
+  auto jupiter = std::make_shared<GeometryNode>(GeometryNode("jupiter"));
+  auto saturn = std::make_shared<GeometryNode>(GeometryNode("saturn"));
+  auto uranus = std::make_shared<GeometryNode>(GeometryNode("uranus"));
+  auto neptun = std::make_shared<GeometryNode>(GeometryNode("neptun"));
+  auto moon = std::make_shared<GeometryNode>(GeometryNode("moon"));
+
+  mercury->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  venus->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  earth->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  mars->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  jupiter->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  saturn->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  uranus->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  neptun->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  moon->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+
   root->addChildren(mercury);
   root->addChildren(venus);
   root->addChildren(earth);
@@ -68,15 +75,22 @@ void ApplicationSolar::initializeObjects(){
   root->addChildren(saturn);
   root->addChildren(uranus);
   root->addChildren(neptun);
+  earth->addChildren(moon);
   
-
+  mercury->setParent(root);
+  venus->setParent(root);
+  earth->setParent(root);
+  mars->setParent(root);
+  jupiter->setParent(root);
+  saturn->setParent(root);
+  uranus->setParent(root);
+  neptun->setParent(root);
+  moon->setParent(earth);
 }
 
 void ApplicationSolar::render() const {
-  
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
     float radius = -1.0f;
-    
     
     if (planet->getName() == "mercury") {
       radius = -3.0f;
@@ -102,10 +116,16 @@ void ApplicationSolar::render() const {
     else if (planet->getName() == "neptun") {
       radius = -45.0f;
     }
+    else if (planet->getName() == "moon") {
+      radius = -5.0f;
+    }
 
     // bind shader to upload uniforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
-    planet->setLocalTransform(glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+    planet->setLocalTransform(glm::rotate(planet->getParent()->getLocalTransform(), float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+    if (planet->getName() == "moon") {
+      planet->setLocalTransform(glm::scale(planet->getLocalTransform(), glm::fvec3{0.5f, 0.5f, 0.5f}));
+    }
     planet->setLocalTransform(glm::translate(planet->getLocalTransform(), glm::fvec3{0.0f, 0.0f, radius}));
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(planet->getLocalTransform()));
@@ -120,7 +140,6 @@ void ApplicationSolar::render() const {
 
     // draw bound vertex array using bound shader
     glDrawElements(planet_objects.at(planet->getName()).draw_mode, planet_objects.at(planet->getName()).num_elements, model::INDEX.type, NULL);
-
   }
   
 }
@@ -129,7 +148,7 @@ void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be inverted
   glm::fmat4 view_matrix = glm::inverse(m_view_transform);
   // upload matrix to gpu
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
     glUseProgram(m_shaders.at(planet->getName()).handle);
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ViewMatrix"),
                       1, GL_FALSE, glm::value_ptr(view_matrix));
@@ -138,7 +157,7 @@ void ApplicationSolar::uploadView() {
 
 void ApplicationSolar::uploadProjection() {
   // upload matrix to gpu
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
     glUseProgram(m_shaders.at(planet->getName()).handle);
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ProjectionMatrix"),
                       1, GL_FALSE, glm::value_ptr(m_view_projection));
@@ -148,9 +167,8 @@ void ApplicationSolar::uploadProjection() {
 // update uniform locations
 void ApplicationSolar::uploadUniforms() { 
   // bind shader to which to upload unforms
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
     glUseProgram(m_shaders.at(planet->getName()).handle);
-  
   }
     // upload uniform values to new locations
     uploadView();
@@ -161,7 +179,7 @@ void ApplicationSolar::uploadUniforms() {
 ///////////////////////////// intialisation functions /////////////////////////
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
     // store shader program objects in container
     m_shaders.emplace(planet->getName(), shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/simple.vert"},
                                             {GL_FRAGMENT_SHADER, m_resource_path + "shaders/simple.frag"}}});
@@ -175,7 +193,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 
 // load models
 void ApplicationSolar::initializeGeometry() {
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
+  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
     planet_objects.emplace(planet->getName(), model_object{});
 
     model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);

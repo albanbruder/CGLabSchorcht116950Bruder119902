@@ -1,6 +1,7 @@
 #include "node.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 Node::Node() {}
 
@@ -14,8 +15,8 @@ std::shared_ptr<Node> Node::getParent() const {
   return parent;
 }
 
-void Node::setParent(const Node &newParent) {
-  parent = std::make_shared<Node>(newParent);
+void Node::setParent(const std::shared_ptr<Node> newParent) {
+  parent = newParent;
 }
 
 std::shared_ptr<Node> Node::getChildren(std::string name) const {
@@ -32,8 +33,22 @@ std::shared_ptr<Node> Node::getChildren(std::string name) const {
   return *it;
 }
 
-std::list<std::shared_ptr<Node>> Node::getChildrenList() const {
-  return children;
+std::list<std::shared_ptr<Node>> Node::getChildrenList(bool recursive) const {
+  if (!recursive) {
+    return children;
+  }
+
+  std::list<std::shared_ptr<Node>> allChildren;
+
+  for(std::shared_ptr<Node> child : children) {
+    allChildren.push_back(child);
+
+    for(std::shared_ptr<Node> subChild : child->getChildrenList(true)) {
+      allChildren.push_back(subChild);
+    }
+  }
+
+  return allChildren;
 }
 
 std::string Node::getName() const {
@@ -64,9 +79,15 @@ void Node::setWorldTransform(const glm::mat4 &transform) {
   worldTransform = transform;
 }
 
-void Node::addChildren(const Node &child) {
-  children.push_back(std::make_shared<Node>(child));
+void Node::addChildren(const std::shared_ptr<Node> &child) {
+  children.push_back(child);
 }
+
+/* std::shared_ptr<GeometryNode> Node::addChildren(const GeometryNode &child) {
+  auto ptr = std::make_shared<GeometryNode>(child);
+  children.push_back(std::dynamic_pointer_cast<Node>(ptr));
+  return ptr;
+} */
 
 std::shared_ptr<Node> Node::removeChildren(std::string name) {
   std::list<std::shared_ptr<Node>>::const_iterator it = std::find_if(

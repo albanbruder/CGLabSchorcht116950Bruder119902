@@ -2,7 +2,8 @@
 
 
 SceneGraph::SceneGraph() {
-  setRoot(Node("root"));
+  Node root = Node("root");
+  setRoot(root);
 }
 
 std::string SceneGraph::getName() const {
