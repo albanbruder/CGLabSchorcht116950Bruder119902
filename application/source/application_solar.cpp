@@ -22,12 +22,11 @@ using namespace gl;
 #include <iostream>
 #include <memory>
 #include <glm/gtx/string_cast.hpp>
+#include <math.h>
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
  ,planet_object{}
- ,m_view_transform{glm::rotate(glm::translate(glm::fmat4{}, glm::fvec3{0.0f, -40.0f, 10.0f}), float(1.57), glm::fvec3{1.0f, 0.0f, 0.0f})}
- ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
  ,graph{}
 {
   initializeObjects();
@@ -44,8 +43,13 @@ ApplicationSolar::~ApplicationSolar() {
 
 void ApplicationSolar::initializeObjects(){
   std::shared_ptr<Node> root = graph.getRoot();
-  CameraNode camera = CameraNode("Camera1");;
-  //root->addChildren(camera);
+
+  auto camera = std::make_shared<CameraNode>(CameraNode("camera"));
+  camera->setLocalTransform(glm::rotate(glm::translate(glm::fmat4{}, glm::fvec3{0.0f, -40.0f, 10.0f}), float(1.57), glm::fvec3{1.0f, 0.0f, 0.0f}));
+  camera->setProjectionMatrix(utils::calculate_projection_matrix(initial_aspect_ratio));
+  root->addChildren(camera);
+  camera->setParent(root);
+  graph.camera = camera;
 
   auto mercury = std::make_shared<GeometryNode>(GeometryNode("mercury"));
   auto venus = std::make_shared<GeometryNode>(GeometryNode("venus"));
@@ -119,6 +123,9 @@ void ApplicationSolar::render() const {
     else if (planet->getName() == "moon") {
       radius = -5.0f;
     }
+    else if (planet->getName() == "camera") {
+      continue;
+    }
 
     // bind shader to upload uniforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
@@ -131,7 +138,7 @@ void ApplicationSolar::render() const {
                       1, GL_FALSE, glm::value_ptr(planet->getLocalTransform()));
 
     // extra matrix for normal transformation to keep them orthogonal to surface
-    planet->setWorldTransform(glm::inverseTranspose(glm::inverse(m_view_transform) * planet->getLocalTransform()));
+    planet->setWorldTransform(glm::inverseTranspose(glm::inverse(graph.camera->getLocalTransform()) * planet->getLocalTransform()));
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("NormalMatrix"),
                       1, GL_FALSE, glm::value_ptr(planet->getWorldTransform()));
     
@@ -146,9 +153,10 @@ void ApplicationSolar::render() const {
 
 void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be inverted
-  glm::fmat4 view_matrix = glm::inverse(m_view_transform);
+  glm::fmat4 view_matrix = glm::inverse(graph.camera->getLocalTransform());
   // upload matrix to gpu
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
+    // bind shader to which to upload unforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ViewMatrix"),
                       1, GL_FALSE, glm::value_ptr(view_matrix));
@@ -158,18 +166,15 @@ void ApplicationSolar::uploadView() {
 void ApplicationSolar::uploadProjection() {
   // upload matrix to gpu
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
+    // bind shader to which to upload unforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ProjectionMatrix"),
-                      1, GL_FALSE, glm::value_ptr(m_view_projection));
+                      1, GL_FALSE, glm::value_ptr(graph.camera->getProjectionMatrix()));
   }
 }
 
 // update uniform locations
 void ApplicationSolar::uploadUniforms() { 
-  // bind shader to which to upload unforms
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
-    glUseProgram(m_shaders.at(planet->getName()).handle);
-  }
     // upload uniform values to new locations
     uploadView();
     uploadProjection();
@@ -237,19 +242,19 @@ void ApplicationSolar::initializeGeometry() {
 // handle key input
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
   if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -0.1f});
+    graph.camera->getLocalTransform() = glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, -0.1f});
     uploadView();
   }
   else if (key == GLFW_KEY_S  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 0.1f});
+    graph.camera->getLocalTransform() = glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, 0.1f});
     uploadView();
   }
   else if (key == GLFW_KEY_A  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    m_view_transform = glm::translate(m_view_transform, glm::fvec3{-0.1f, 0.0f, 0.0f});
+    graph.camera->getLocalTransform() = glm::translate(graph.camera->getLocalTransform(), glm::fvec3{-0.1f, 0.0f, 0.0f});
     uploadView();
   }
   else if (key == GLFW_KEY_D  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.1f, 0.0f, 0.0f});
+    graph.camera->getLocalTransform() = glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.1f, 0.0f, 0.0f});
     uploadView();
   }
 }
@@ -257,14 +262,16 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   // mouse handling
-  //m_view_transform = glm::translate(m_view_transform, glm::fvec3{ pos_x*0.01f, pos_y*-0.01f, 0.0f });
-	//uploadView();
+  graph.camera->setLocalTransform(glm::rotate(graph.camera->getLocalTransform(), float((pos_x / -50.0f)*M_PI/180), glm::fvec3{0.0f, 1.0f, 0.0f}));
+  std::cout << "x: " << pos_x << ", y: " << pos_y << std::endl;
+  //graph.camera->setLocalTransform(glm::rotate(graph.camera->getLocalTransform(), 0.017f,glm::fvec3{ pos_y*1.0f, 0.0f, 0.0f }));
+	uploadView();
 }
 
 //handle resizing
 void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
   // recalculate projection matrix for new aspect ration
-  m_view_projection = utils::calculate_projection_matrix(float(width) / float(height));
+  graph.camera->setProjectionMatrix(utils::calculate_projection_matrix(float(width) / float(height)));
   // upload new projection matrix
   uploadProjection();
 }

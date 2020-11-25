@@ -40,10 +40,6 @@ class ApplicationSolar : public Application {
   model_object planet_object;
   std::map<std::string, model_object> planet_objects{};
   
-  // camera transform matrix
-  glm::fmat4 m_view_transform;
-  // camera projection matrix
-  glm::fmat4 m_view_projection;
   //SceneGraph
   SceneGraph graph;
 };
