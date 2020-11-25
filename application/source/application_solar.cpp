@@ -44,30 +44,30 @@ void ApplicationSolar::initializeObjects(){
   std::shared_ptr<Node> root = graph.getRoot();
   CameraNode camera = CameraNode("Camera1");;
   //root->addChildren(camera);
-  GeometryNode planet1 = GeometryNode("Planet1");
-  GeometryNode planet2 = GeometryNode("Planet2");
-  GeometryNode planet3 = GeometryNode("Planet3");
-  GeometryNode planet4 = GeometryNode("Planet4");
-  GeometryNode planet5 = GeometryNode("Planet5");
-  GeometryNode planet6 = GeometryNode("Planet6");
-  GeometryNode planet7 = GeometryNode("Planet7");
-  GeometryNode planet8 = GeometryNode("Planet8");
-  planet1.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  planet2.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  planet3.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  planet4.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  planet5.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  planet6.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  planet7.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  planet8.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  root->addChildren(planet1);
-  root->addChildren(planet2);
-  root->addChildren(planet3);
-  root->addChildren(planet4);
-  root->addChildren(planet5);
-  root->addChildren(planet6);
-  root->addChildren(planet7);
-  root->addChildren(planet8);
+  GeometryNode mercury = GeometryNode("mercury");
+  GeometryNode venus = GeometryNode("venus");
+  GeometryNode earth = GeometryNode("earth");
+  GeometryNode mars = GeometryNode("mars");
+  GeometryNode jupiter = GeometryNode("jupiter");
+  GeometryNode saturn = GeometryNode("saturn");
+  GeometryNode uranus = GeometryNode("uranus");
+  GeometryNode neptun = GeometryNode("neptun");
+  mercury.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  venus.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  earth.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  mars.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  jupiter.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  saturn.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  uranus.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  neptun.setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  root->addChildren(mercury);
+  root->addChildren(venus);
+  root->addChildren(earth);
+  root->addChildren(mars);
+  root->addChildren(jupiter);
+  root->addChildren(saturn);
+  root->addChildren(uranus);
+  root->addChildren(neptun);
   
 
 }
@@ -78,28 +78,28 @@ void ApplicationSolar::render() const {
     float radius = -1.0f;
     
     
-    if (planet->getName() == "Planet1") {
+    if (planet->getName() == "mercury") {
       radius = -3.0f;
     }
-    else if (planet->getName() == "Planet2") {
+    else if (planet->getName() == "venus") {
       radius = -8.0f;
     }
-    else if (planet->getName() == "Planet3") {
+    else if (planet->getName() == "earth") {
       radius = -14.0f;
     }
-    else if (planet->getName() == "Planet4") {
+    else if (planet->getName() == "mars") {
       radius = -20.0f;
     }
-    else if (planet->getName() == "Planet5") {
+    else if (planet->getName() == "jupiter") {
       radius = -28.0f;
     }
-    else if (planet->getName() == "Planet6") {
+    else if (planet->getName() == "saturn") {
       radius = -33.0f;
     }
-    else if (planet->getName() == "Planet7") {
+    else if (planet->getName() == "uranus") {
       radius = -38.0f;
     }
-    else if (planet->getName() == "Planet8") {
+    else if (planet->getName() == "neptun") {
       radius = -45.0f;
     }
 
