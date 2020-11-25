@@ -1,12 +1,14 @@
 #include "node.hpp"
 
 #include <algorithm>
+#include <cstdlib>
 #include <iostream>
 
 Node::Node() {}
 
 Node::Node(std::string nodeName) {
   name = nodeName;
+  speed=(rand()%100) + 1;
 }
 
 Node::~Node() {}
@@ -105,4 +107,11 @@ std::shared_ptr<Node> Node::removeChildren(std::string name) {
   std::remove(std::begin(children), std::end(children), child);
   return child;
 }
-  
+
+float Node::getSpeed() const{
+  return speed;
+}
+
+void Node::setSpeed(float newSpeed){
+  speed=newSpeed;
+}

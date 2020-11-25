@@ -18,6 +18,8 @@ class Node {
     std::string getName() const;
     std::string getPath() const;
     int getDepth() const;
+    float getSpeed() const;
+    void setSpeed(float newSpeed);
     glm::mat4 getLocalTransform() const;
     void setLocalTransform(const glm::mat4 &transform);
     glm::fmat4 getWorldTransform() const;
@@ -34,6 +36,7 @@ class Node {
     std::list<std::shared_ptr<Node>> children;
     std::string name;
     std::string path;
+    float speed=1.0f;
     int depth;
     glm::fmat4 localTransform;
     glm::fmat4 worldTransform;

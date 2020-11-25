@@ -23,6 +23,8 @@ using namespace gl;
 #include <memory>
 #include <glm/gtx/string_cast.hpp>
 #include <math.h>
+#include <iostream>
+#include <string>
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -129,7 +131,7 @@ void ApplicationSolar::render() const {
 
     // bind shader to upload uniforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
-    planet->setLocalTransform(glm::rotate(planet->getParent()->getLocalTransform(), float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+    planet->setLocalTransform(glm::rotate(planet->getParent()->getLocalTransform(), float(planet->getSpeed()/100.0f*glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
     if (planet->getName() == "moon") {
       planet->setLocalTransform(glm::scale(planet->getLocalTransform(), glm::fvec3{0.5f, 0.5f, 0.5f}));
     }
@@ -241,20 +243,25 @@ void ApplicationSolar::initializeGeometry() {
 ///////////////////////////// callback functions for window events ////////////
 // handle key input
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
-  if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    graph.camera->getLocalTransform() = glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, -0.1f});
+
+  float multiplier=1.0f;
+  if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    multiplier=3.0f;
+  }
+  else if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, multiplier*-0.1f}));
     uploadView();
   }
   else if (key == GLFW_KEY_S  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    graph.camera->getLocalTransform() = glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, 0.1f});
+    graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, multiplier*0.1f}));
     uploadView();
   }
   else if (key == GLFW_KEY_A  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    graph.camera->getLocalTransform() = glm::translate(graph.camera->getLocalTransform(), glm::fvec3{-0.1f, 0.0f, 0.0f});
+    graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{multiplier*-0.1f, 0.0f, 0.0f}));
     uploadView();
   }
   else if (key == GLFW_KEY_D  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    graph.camera->getLocalTransform() = glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.1f, 0.0f, 0.0f});
+    graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{multiplier*0.1f, 0.0f, 0.0f}));
     uploadView();
   }
 }
@@ -264,7 +271,7 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   // mouse handling
   graph.camera->setLocalTransform(glm::rotate(graph.camera->getLocalTransform(), float((pos_x / -50.0f)*M_PI/180), glm::fvec3{0.0f, 1.0f, 0.0f}));
   std::cout << "x: " << pos_x << ", y: " << pos_y << std::endl;
-  //graph.camera->setLocalTransform(glm::rotate(graph.camera->getLocalTransform(), 0.017f,glm::fvec3{ pos_y*1.0f, 0.0f, 0.0f }));
+  graph.camera->setLocalTransform(glm::rotate(graph.camera->getLocalTransform(), float((pos_y / -50.0f)*M_PI/180),glm::fvec3{ 1.0f, 0.0f, 0.0f }));
 	uploadView();
 }
 
