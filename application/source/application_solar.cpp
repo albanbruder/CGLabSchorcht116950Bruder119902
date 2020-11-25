@@ -53,6 +53,7 @@ void ApplicationSolar::initializeObjects(){
   camera->setParent(root);
   graph.camera = camera;
 
+  auto sun = std::make_shared<GeometryNode>(GeometryNode("sun"));
   auto mercury = std::make_shared<GeometryNode>(GeometryNode("mercury"));
   auto venus = std::make_shared<GeometryNode>(GeometryNode("venus"));
   auto earth = std::make_shared<GeometryNode>(GeometryNode("earth"));
@@ -63,16 +64,18 @@ void ApplicationSolar::initializeObjects(){
   auto neptun = std::make_shared<GeometryNode>(GeometryNode("neptun"));
   auto moon = std::make_shared<GeometryNode>(GeometryNode("moon"));
 
+  sun->setGeometry(model_loader::obj(m_resource_path + "models/sun.obj", model::NORMAL));
   mercury->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   venus->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   earth->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   mars->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   jupiter->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  saturn->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  saturn->setGeometry(model_loader::obj(m_resource_path + "models/saturn.obj", model::NORMAL));
   uranus->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   neptun->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
   moon->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
 
+  root->addChildren(sun);
   root->addChildren(mercury);
   root->addChildren(venus);
   root->addChildren(earth);
@@ -83,6 +86,7 @@ void ApplicationSolar::initializeObjects(){
   root->addChildren(neptun);
   earth->addChildren(moon);
   
+  sun->setParent(root);
   mercury->setParent(root);
   venus->setParent(root);
   earth->setParent(root);
@@ -99,7 +103,7 @@ void ApplicationSolar::render() const {
     float radius = -1.0f;
     
     if (planet->getName() == "mercury") {
-      radius = -3.0f;
+      radius = -5.0f;
     }
     else if (planet->getName() == "venus") {
       radius = -8.0f;
@@ -128,12 +132,21 @@ void ApplicationSolar::render() const {
     else if (planet->getName() == "camera") {
       continue;
     }
+    else if (planet->getName() == "sun") {
+      radius = 0.0f;
+    }
 
     // bind shader to upload uniforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
     planet->setLocalTransform(glm::rotate(planet->getParent()->getLocalTransform(), float(planet->getSpeed()/100.0f*glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
     if (planet->getName() == "moon") {
       planet->setLocalTransform(glm::scale(planet->getLocalTransform(), glm::fvec3{0.5f, 0.5f, 0.5f}));
+    }
+    else if (planet->getName() == "sun") {
+      planet->setLocalTransform(glm::scale(planet->getLocalTransform(), glm::fvec3{2.0f, 2.0f, 2.0f}));
+    }
+    else if (planet->getName() == "mercury") {
+      planet->setLocalTransform(glm::scale(planet->getLocalTransform(), glm::fvec3{0.7f, 0.7f, 0.7f}));
     }
     planet->setLocalTransform(glm::translate(planet->getLocalTransform(), glm::fvec3{0.0f, 0.0f, radius}));
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ModelMatrix"),
@@ -203,8 +216,19 @@ void ApplicationSolar::initializeGeometry() {
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
     planet_objects.emplace(planet->getName(), model_object{});
 
-    model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
-
+    //std::shared_ptr<model> planet_model = std::static_pointer_cast<GeometryNode>(planet)->getGeometry(); 
+    std::shared_ptr<model> planet_model;
+    if (planet->getName() == "saturn") {
+      planet_model= std::make_shared<model>(model_loader::obj(m_resource_path + "models/saturn.obj", model::NORMAL));
+    }
+    else if (planet->getName() == "sun") {
+      planet_model= std::make_shared<model>(model_loader::obj(m_resource_path + "models/sun.obj", model::NORMAL));
+    }
+    else
+    {
+      planet_model= std::make_shared<model>(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+    }
+    
     // generate vertex array object
     glGenVertexArrays(1, &(planet_objects.at(planet->getName())).vertex_AO);
     // bind the array for attaching buffers
@@ -215,38 +239,42 @@ void ApplicationSolar::initializeGeometry() {
     // bind this as an vertex array buffer containing all attributes
     glBindBuffer(GL_ARRAY_BUFFER, planet_objects.at(planet->getName()).vertex_BO);
     // configure currently bound array buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * planet_model.data.size(), planet_model.data.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * planet_model->data.size(), planet_model->data.data(), GL_STATIC_DRAW);
 
     // activate first attribute on gpu
     glEnableVertexAttribArray(0);
     // first attribute is 3 floats with no offset & stride
-    glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::POSITION]);
+    glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type, GL_FALSE, planet_model->vertex_bytes, planet_model->offsets[model::POSITION]);
     // activate second attribute on gpu
     glEnableVertexAttribArray(1);
     // second attribute is 3 floats with no offset & stride
-    glVertexAttribPointer(1, model::NORMAL.components, model::NORMAL.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::NORMAL]);
+    glVertexAttribPointer(1, model::NORMAL.components, model::NORMAL.type, GL_FALSE, planet_model->vertex_bytes, planet_model->offsets[model::NORMAL]);
 
     // generate generic buffer
     glGenBuffers(1, &(planet_objects.at(planet->getName())).element_BO);
     // bind this as an vertex array buffer containing all attributes
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planet_objects.at(planet->getName()).element_BO);
     // configure currently bound array buffer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, model::INDEX.size * planet_model.indices.size(), planet_model.indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, model::INDEX.size * planet_model->indices.size(), planet_model->indices.data(), GL_STATIC_DRAW);
 
     // store type of primitive to draw
     planet_objects.at(planet->getName()).draw_mode = GL_TRIANGLES;
     // transfer number of indices to model object 
-    planet_objects.at(planet->getName()).num_elements = GLsizei(planet_model.indices.size());
+    planet_objects.at(planet->getName()).num_elements = GLsizei(planet_model->indices.size());
   }
 }
 
 ///////////////////////////// callback functions for window events ////////////
 // handle key input
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
-
+  //multiplier for extra speed
   float multiplier=1.0f;
-  if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  //speed up when pressing shift in cobination with other keys
+  if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS)) {
     multiplier=3.0f;
+  }
+  else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_RELEASE)) {
+    multiplier=1.0f;
   }
   else if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, multiplier*-0.1f}));
@@ -269,8 +297,9 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   // mouse handling
+  //rotate y axis
   graph.camera->setLocalTransform(glm::rotate(graph.camera->getLocalTransform(), float((pos_x / -50.0f)*M_PI/180), glm::fvec3{0.0f, 1.0f, 0.0f}));
-  std::cout << "x: " << pos_x << ", y: " << pos_y << std::endl;
+  //rotate x axis
   graph.camera->setLocalTransform(glm::rotate(graph.camera->getLocalTransform(), float((pos_y / -50.0f)*M_PI/180),glm::fvec3{ 1.0f, 0.0f, 0.0f }));
 	uploadView();
 }
