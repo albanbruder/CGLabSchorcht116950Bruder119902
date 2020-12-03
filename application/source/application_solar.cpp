@@ -116,8 +116,11 @@ void ApplicationSolar::render() const {
   glDrawArrays(star_object.draw_mode, 0, star_object.num_elements);
 
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
+    // default radius to sun
     float radius = -1.0f;
     
+    // set distances to sun
+    // TODO: replace with node variable
     if (planet->getName() == "mercury") {
       radius = -5.0f;
     }
@@ -154,16 +157,22 @@ void ApplicationSolar::render() const {
 
     // bind shader to upload uniforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
+
+    // rotate from parent transformation matrix
     planet->setLocalTransform(glm::rotate(planet->getParent()->getLocalTransform(), float(planet->getSpeed()/100.0f*glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
-    if (planet->getName() == "moon") {
+
+    // TODO: add size as node variable
+    if (planet->getName() == "moon") { // scale down the earths moon
       planet->setLocalTransform(glm::scale(planet->getLocalTransform(), glm::fvec3{0.5f, 0.5f, 0.5f}));
     }
-    else if (planet->getName() == "sun") {
+    else if (planet->getName() == "sun") { // scale up the sun
       planet->setLocalTransform(glm::scale(planet->getLocalTransform(), glm::fvec3{2.0f, 2.0f, 2.0f}));
     }
-    else if (planet->getName() == "mercury") {
+    else if (planet->getName() == "mercury") { // scale down mercury
       planet->setLocalTransform(glm::scale(planet->getLocalTransform(), glm::fvec3{0.7f, 0.7f, 0.7f}));
     }
+
+    // translate according to radius
     planet->setLocalTransform(glm::translate(planet->getLocalTransform(), glm::fvec3{0.0f, 0.0f, radius}));
     glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(planet->getLocalTransform()));

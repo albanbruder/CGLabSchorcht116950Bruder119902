@@ -22,12 +22,14 @@ void Node::setParent(const std::shared_ptr<Node> newParent) {
 }
 
 std::shared_ptr<Node> Node::getChildren(std::string name) const {
+  // find the elements iterator
   std::list<std::shared_ptr<Node>>::const_iterator it = std::find_if(
     std::begin(children),
     std::end(children),
     [name](std::shared_ptr<Node> child) { return child->getName() == name; }
   );
 
+  // check if child exists
   if (it == std::end(children)) {
     return nullptr;
   }
@@ -36,6 +38,7 @@ std::shared_ptr<Node> Node::getChildren(std::string name) const {
 }
 
 std::list<std::shared_ptr<Node>> Node::getChildrenList(bool recursive) const {
+  // if not recursive, just return the chidlren list
   if (!recursive) {
     return children;
   }
@@ -43,8 +46,10 @@ std::list<std::shared_ptr<Node>> Node::getChildrenList(bool recursive) const {
   std::list<std::shared_ptr<Node>> allChildren;
 
   for(std::shared_ptr<Node> child : children) {
+    // add all children of this node
     allChildren.push_back(child);
 
+    // add all children of child nodes
     for(std::shared_ptr<Node> subChild : child->getChildrenList(true)) {
       allChildren.push_back(subChild);
     }
@@ -85,25 +90,23 @@ void Node::addChildren(const std::shared_ptr<Node> &child) {
   children.push_back(child);
 }
 
-/* std::shared_ptr<GeometryNode> Node::addChildren(const GeometryNode &child) {
-  auto ptr = std::make_shared<GeometryNode>(child);
-  children.push_back(std::dynamic_pointer_cast<Node>(ptr));
-  return ptr;
-} */
-
 std::shared_ptr<Node> Node::removeChildren(std::string name) {
+  // find the elements iterator
   std::list<std::shared_ptr<Node>>::const_iterator it = std::find_if(
     std::begin(children),
     std::end(children),
     [name](std::shared_ptr<Node> child) { return child->getName() == name; }
   );
   
+  // check if element exists
   if (it == std::end(children)) {
     return nullptr;
   }
 
+  // dereference iterator
   std::shared_ptr<Node> child = *it;
 
+  // remove and return
   std::remove(std::begin(children), std::end(children), child);
   return child;
 }
