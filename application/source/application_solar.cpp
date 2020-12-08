@@ -305,27 +305,26 @@ void ApplicationSolar::initializeGeometry() {
 // handle key input
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
   //multiplier for extra speed
-  float multiplier=1.0f;
   //speed up when pressing shift in cobination with other keys
   if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS)) {
-    multiplier=3.0f;
+    multiplier=4.0f;
   }
-  else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_RELEASE)) {
+  if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_RELEASE)) {
     multiplier=1.0f;
   }
-  else if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, multiplier*-0.1f}));
     uploadView();
   }
-  else if (key == GLFW_KEY_S  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  if (key == GLFW_KEY_S  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{0.0f, 0.0f, multiplier*0.1f}));
     uploadView();
   }
-  else if (key == GLFW_KEY_A  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  if (key == GLFW_KEY_A  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{multiplier*-0.1f, 0.0f, 0.0f}));
     uploadView();
   }
-  else if (key == GLFW_KEY_D  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  if (key == GLFW_KEY_D  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     graph.camera->setLocalTransform(glm::translate(graph.camera->getLocalTransform(), glm::fvec3{multiplier*0.1f, 0.0f, 0.0f}));
     uploadView();
   }

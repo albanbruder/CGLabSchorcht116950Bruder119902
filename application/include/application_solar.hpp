@@ -47,6 +47,8 @@ class ApplicationSolar : public Application {
   std::map<std::string, std::vector<GLfloat>> orbit_containers;
   //SceneGraph
   SceneGraph graph;
+  //Shift Speed multiplier
+  float multiplier=1.0f;
 };
 
 #endif
