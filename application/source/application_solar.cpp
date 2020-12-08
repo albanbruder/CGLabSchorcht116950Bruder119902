@@ -202,10 +202,12 @@ void ApplicationSolar::uploadProjection() {
                       1, GL_FALSE, glm::value_ptr(graph.camera->getProjectionMatrix()));
   }
 
+  // handle star shaders
   glUseProgram(m_shaders.at("stars").handle);
   glUniformMatrix4fv(m_shaders.at("stars").u_locs.at("ProjectionMatrix"),
                      1, GL_FALSE, glm::value_ptr(graph.camera->getProjectionMatrix()));     
 
+  // handle orbit shaders
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
     glUseProgram(m_shaders.at(planet->getName() + "-orbit").handle);
     glUniformMatrix4fv(m_shaders.at(planet->getName() + "-orbit").u_locs.at("ProjectionMatrix"),
@@ -235,11 +237,13 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at(planet->getName()).u_locs["ProjectionMatrix"] = -1;
   }
 
+  // create star shader
   m_shaders.emplace("stars", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/stars.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/stars.frag"}}});
   m_shaders.at("stars").u_locs["ViewMatrix"] = -1;
   m_shaders.at("stars").u_locs["ProjectionMatrix"] = -1;  
 
+  // create orbit shaders
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
     m_shaders.emplace(planet->getName() + "-orbit", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/stars.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/stars.frag"}}});
@@ -394,6 +398,7 @@ void ApplicationSolar::initalizeStars(){
 }
 
 void ApplicationSolar::initalizeOrbits(){
+  // 360 points in orbit, one per degree
   int orbitCount=360;
 
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
@@ -401,11 +406,11 @@ void ApplicationSolar::initalizeOrbits(){
     for (int i = 0; i < orbitCount; ++i)
     {
       auto v = glm::rotate(glm::vec3{0.0f,0.0f,planet->getOrbit()}, float(i*M_PI/180), glm::vec3{0.0f, 1.0f, 0.0f});
-      //random position for stars
+      // position for point in orbit
       orbit_containers.at(planet->getName()).push_back(v.x);
       orbit_containers.at(planet->getName()).push_back(v.y);
       orbit_containers.at(planet->getName()).push_back(v.z); 
-      //random color for stars
+      // color for point in orbit
       orbit_containers.at(planet->getName()).push_back(1.0f);
       orbit_containers.at(planet->getName()).push_back(0.0f);
       orbit_containers.at(planet->getName()).push_back(0.0f); 
