@@ -10,6 +10,7 @@ class GeometryNode : public Node {
     // constructors
     GeometryNode();
     GeometryNode(std::string name);
+    GeometryNode(std::string name, float orbit);
 
     /**
      * Get the geometry model of this node

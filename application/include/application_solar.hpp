@@ -36,12 +36,15 @@ class ApplicationSolar : public Application {
   // upload view matrix
   void uploadView();
   void initalizeStars();
+  void initalizeOrbits();
 
   // cpu representation of model
   model_object planet_object;
   model_object star_object;
+  std::map<std::string, model_object> orbit_objects{};
   std::map<std::string, model_object> planet_objects{};
   std::vector<GLfloat> star_container;
+  std::map<std::string, std::vector<GLfloat>> orbit_containers;
   //SceneGraph
   SceneGraph graph;
 };

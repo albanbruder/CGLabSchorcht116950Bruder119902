@@ -11,6 +11,12 @@ Node::Node(std::string nodeName) {
   speed=(rand()%100) + 1;
 }
 
+Node::Node(std::string nodeName, float nodeOrbit) {
+  name = nodeName;
+  orbit = nodeOrbit;
+  speed=(rand()%100) + 1;
+}
+
 Node::~Node() {}
 
 std::shared_ptr<Node> Node::getParent() const {
@@ -117,4 +123,12 @@ float Node::getSpeed() const{
 
 void Node::setSpeed(float newSpeed){
   speed=newSpeed;
+}
+
+float Node::getOrbit() const{
+  return orbit;
+}
+
+void Node::setOrbit(float newOrbit){
+  orbit=newOrbit;
 }

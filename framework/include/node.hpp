@@ -60,6 +60,16 @@ class Node {
     void setSpeed(float newSpeed);
 
     /**
+     * Get the orbit of this node
+     */
+    float getOrbit() const;
+
+    /**
+     * Set the orbit of this node
+     */
+    void setOrbit(float newOrbit);
+
+    /**
      * Get the local transformation matrix of this node
      */
     glm::mat4 getLocalTransform() const;
@@ -92,6 +102,7 @@ class Node {
     // constructors and destructors
     Node();
     Node(std::string name);
+    Node(std::string name, float orbit);
 	  ~Node();
 
   private:
@@ -112,6 +123,8 @@ class Node {
 
     // depth of the node
     int depth;
+
+    float orbit = 0.0f;
 
     // local transformation matrix of the node
     glm::fmat4 localTransform;

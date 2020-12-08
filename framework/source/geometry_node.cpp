@@ -5,6 +5,9 @@ GeometryNode::GeometryNode() {}
 GeometryNode::GeometryNode(std::string name) 
   : Node{name} {}
 
+GeometryNode::GeometryNode(std::string name, float orbit) 
+  : Node{name, orbit} {}
+
 std::shared_ptr<model> GeometryNode::getGeometry() const {
   return geometry;
 }
