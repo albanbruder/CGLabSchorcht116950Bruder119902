@@ -355,13 +355,13 @@ void ApplicationSolar::initalizeStars(){
   for (int i = 0; i < starsCount; ++i)
   {
     //random position for stars
-    GLfloat pos_x = rand()%(maxDistanceFromOrign+1)-maxDistanceFromOrign/2;//(1.0f + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(100-1))))-50.0f;
-    GLfloat pos_y = rand()%(maxDistanceFromOrign+1)-maxDistanceFromOrign/2;//(1.0f + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(100-1))))-50.0f;
-    GLfloat pos_z = rand()%(maxDistanceFromOrign+1)-maxDistanceFromOrign/2;//(1.0f + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(100-1))))-50.0f;
+    GLfloat pos_x = rand() % (2*maxDistanceFromOrign + 1) - maxDistanceFromOrign;
+    GLfloat pos_y = rand() % (2*maxDistanceFromOrign + 1) - maxDistanceFromOrign;
+    GLfloat pos_z = rand() % (2*maxDistanceFromOrign + 1) - maxDistanceFromOrign;
     star_container.push_back(pos_y);
     star_container.push_back(pos_x);
     star_container.push_back(pos_z); 
-    //rabdom color for stars
+    //random color for stars
     GLfloat r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     GLfloat g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     GLfloat b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
