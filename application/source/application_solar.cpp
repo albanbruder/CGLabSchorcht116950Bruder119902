@@ -168,6 +168,10 @@ void ApplicationSolar::render() const {
     // color vertex
     glUniform3f(m_shaders.at(planet->getName()).u_locs.at("ColorVertex"), gPlanet->getColor().r, gPlanet->getColor().g, gPlanet->getColor().b);
 
+    // camera position
+    auto cameraPos = (graph.camera->getLocalTransform() * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
+    glUniform3f(m_shaders.at(planet->getName()).u_locs.at("CameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
+
     // draw bound vertex array using bound shader
     glDrawElements(planet_objects.at(planet->getName()).draw_mode, planet_objects.at(planet->getName()).num_elements, model::INDEX.type, NULL);
   }
@@ -241,6 +245,7 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at(planet->getName()).u_locs["ViewMatrix"] = -1;
     m_shaders.at(planet->getName()).u_locs["ProjectionMatrix"] = -1;
     m_shaders.at(planet->getName()).u_locs["ColorVertex"] = -1;
+    m_shaders.at(planet->getName()).u_locs["CameraPosition"] = -1;
   }
 
   // create star shader

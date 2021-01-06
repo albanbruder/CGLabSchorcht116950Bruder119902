@@ -10,10 +10,17 @@ uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 uniform mat4 NormalMatrix;
 
-out vec3 pass_Normal;
+out vec3 WorldSpacePosition;
+out vec3 WorldSpaceNormal;
 
 void main(void)
 {
+	// vertex position in world space
+	WorldSpacePosition = vec3(ModelMatrix * vec4(in_Position, 1.0));
+
+	// vertex normal in world space
+	WorldSpaceNormal = inverse(transpose(mat3(ModelMatrix))) * in_Normal;
+
 	gl_Position = (ProjectionMatrix  * ViewMatrix * ModelMatrix) * vec4(in_Position, 1.0);
-	pass_Normal = (NormalMatrix * vec4(in_Normal, 0.0)).xyz;
+	//pass_Normal = (NormalMatrix * vec4(in_Normal, 0.0)).xyz;
 }
