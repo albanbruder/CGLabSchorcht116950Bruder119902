@@ -63,16 +63,16 @@ void ApplicationSolar::initializeObjects(){
   camera->setParent(root);
   graph.camera = camera;
 
-  auto sun = std::make_shared<GeometryNode>(GeometryNode("sun"));
-  auto mercury = std::make_shared<GeometryNode>(GeometryNode("mercury", 5.0f));
-  auto venus = std::make_shared<GeometryNode>(GeometryNode("venus", 8.0f));
-  auto earth = std::make_shared<GeometryNode>(GeometryNode("earth", 14.0f));
-  auto mars = std::make_shared<GeometryNode>(GeometryNode("mars", 20.0f));
-  auto jupiter = std::make_shared<GeometryNode>(GeometryNode("jupiter", 28.0f));
-  auto saturn = std::make_shared<GeometryNode>(GeometryNode("saturn", 33.0f));
-  auto uranus = std::make_shared<GeometryNode>(GeometryNode("uranus", 38.0f));
-  auto neptun = std::make_shared<GeometryNode>(GeometryNode("neptun", 45.0f));
-  auto moon = std::make_shared<GeometryNode>(GeometryNode("moon", 5.0f));
+  auto sun = std::make_shared<GeometryNode>(GeometryNode("sun", 0.0f, glm::vec3{1.0f, 1.0f, 0.0f}));
+  auto mercury = std::make_shared<GeometryNode>(GeometryNode("mercury", 5.0f, glm::vec3{0.7f, 0.7f, 0.7f}));
+  auto venus = std::make_shared<GeometryNode>(GeometryNode("venus", 8.0f, glm::vec3{1.0f, 228.0f/255.0f, 85.0f/255.0f}));
+  auto earth = std::make_shared<GeometryNode>(GeometryNode("earth", 14.0f, glm::vec3{32.0f/255.0f, 109.0f/255.0f, 223.0f/255.0f}));
+  auto mars = std::make_shared<GeometryNode>(GeometryNode("mars", 20.0f, glm::vec3{243.0f/255.0f, 85.0f/255.0f, 36.0f/255.0f}));
+  auto jupiter = std::make_shared<GeometryNode>(GeometryNode("jupiter", 28.0f, glm::vec3{202.0f/255.0f, 180.0f/255.0f, 173.0f/255.0f}));
+  auto saturn = std::make_shared<GeometryNode>(GeometryNode("saturn", 33.0f, glm::vec3{192.0f/255.0f, 159.0f/255.0f, 186.0f/255.0f}));
+  auto uranus = std::make_shared<GeometryNode>(GeometryNode("uranus", 38.0f, glm::vec3{163.0f/255.0f, 232.0f/255.0f, 253.0f/255.0f}));
+  auto neptun = std::make_shared<GeometryNode>(GeometryNode("neptun", 45.0f, glm::vec3{119.0f/255.0f, 110.0f/255.0f, 1.0f}));
+  auto moon = std::make_shared<GeometryNode>(GeometryNode("moon", 5.0f, glm::vec3{141.0f/255.0f, 141.0f/255.0f, 141.0f/255.0f}));
 
   sun->setGeometry(model_loader::obj(m_resource_path + "models/sun.obj", model::NORMAL));
   mercury->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
@@ -133,6 +133,8 @@ void ApplicationSolar::render() const {
       continue;
     }
 
+    std::shared_ptr<GeometryNode> gPlanet = std::static_pointer_cast<GeometryNode>(planet);
+
     // bind shader to upload uniforms
     glUseProgram(m_shaders.at(planet->getName()).handle);
 
@@ -162,6 +164,9 @@ void ApplicationSolar::render() const {
     
     // bind the VAO to draw
     glBindVertexArray(planet_objects.at(planet->getName()).vertex_AO);
+
+    // color vertex
+    glUniform3f(m_shaders.at(planet->getName()).u_locs.at("ColorVertex"), gPlanet->getColor().r, gPlanet->getColor().g, gPlanet->getColor().b);
 
     // draw bound vertex array using bound shader
     glDrawElements(planet_objects.at(planet->getName()).draw_mode, planet_objects.at(planet->getName()).num_elements, model::INDEX.type, NULL);
@@ -235,6 +240,7 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at(planet->getName()).u_locs["ModelMatrix"] = -1;
     m_shaders.at(planet->getName()).u_locs["ViewMatrix"] = -1;
     m_shaders.at(planet->getName()).u_locs["ProjectionMatrix"] = -1;
+    m_shaders.at(planet->getName()).u_locs["ColorVertex"] = -1;
   }
 
   // create star shader
