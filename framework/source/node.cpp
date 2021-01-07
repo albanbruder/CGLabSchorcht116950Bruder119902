@@ -4,6 +4,10 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
+
 Node::Node() {}
 
 Node::Node(std::string nodeName) {
@@ -82,6 +86,12 @@ glm::mat4 Node::getLocalTransform() const {
 
 void Node::setLocalTransform(const glm::mat4 &transform) {
   localTransform = transform;
+  if(getParent()==nullptr){
+    setWorldTransform(glm::inverseTranspose(glm::inverse(getLocalTransform()) * localTransform));
+  }else
+  {
+    setWorldTransform(glm::inverseTranspose(glm::inverse(getParent()->getLocalTransform()) * localTransform));
+  }
 }
 
 glm::mat4 Node::getWorldTransform() const {
