@@ -1,5 +1,5 @@
-#ifndef GEOMETRY_NODE_HPP
-#define GEOMETRY_NODE_HPP
+#ifndef POINT_LIGHT_NODE_HPP
+#define POINT_LIGHT_NODE_HPP
 
 #include "node.hpp"
 #include "model.hpp"
@@ -29,6 +29,16 @@ class PointLightNode : public Node {
      * Set the light color of this node
      */
     void setLightColor(glm::vec3 lightColor);
+
+    /**
+     * Get the light position of this node
+     */
+    glm::vec3 getLightPosition() const;
+
+    /**
+     * Set the light position of this node
+     */
+    void setLightPosition(glm::vec3 lightPosition);
     
   private:
     // light intensity of the node
@@ -36,6 +46,9 @@ class PointLightNode : public Node {
 
     // light color of the node
     glm::vec3 lightColor;
+
+     // light position of the node
+    glm::vec3 lightPosition;
 };
 
 #endif

@@ -54,6 +54,11 @@ ApplicationSolar::~ApplicationSolar() {
 }
 
 void ApplicationSolar::initializeObjects(){
+  graph.light = std::make_shared<PointLightNode>(PointLightNode());
+  graph.light->setLightColor(glm::vec3{1.0f, 1.0f, 0.9f});
+  graph.light->setLightIntensity(2.0f);
+  graph.light->setLightPosition(glm::vec3{0.0f, -10.0f, 0.0f});
+
   std::shared_ptr<Node> root = graph.getRoot();
 
   auto camera = std::make_shared<CameraNode>(CameraNode("camera"));
@@ -181,6 +186,10 @@ void ApplicationSolar::render() const {
     auto cameraPos = (graph.camera->getLocalTransform() * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
     glUniform3f(m_shaders.at("planet").u_locs.at("CameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
 
+    glUniform3f(m_shaders.at("planet").u_locs.at("lightColor"), graph.light->getLightColor().r, graph.light->getLightColor().g, graph.light->getLightColor().b);
+    glUniform3f(m_shaders.at("planet").u_locs.at("lightPosition"), graph.light->getLightPosition().x, graph.light->getLightPosition().y, graph.light->getLightPosition().z);
+    glUniform1f(m_shaders.at("planet").u_locs.at("lightIntensity"), graph.light->getLightIntensity());
+
     // draw bound vertex array using bound shader
     glDrawElements(planet_objects.at(planet->getName()).draw_mode, planet_objects.at(planet->getName()).num_elements, model::INDEX.type, NULL);
   }
@@ -249,6 +258,9 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
     m_shaders.at("planet").u_locs["ColorVertex"] = -1;
     m_shaders.at("planet").u_locs["CameraPosition"] = -1;
+    m_shaders.at("planet").u_locs["lightColor"] = -1;
+    m_shaders.at("planet").u_locs["lightPosition"] = -1;
+    m_shaders.at("planet").u_locs["lightIntensity"] = -1;
 
   // create star shader
   m_shaders.emplace("stars", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/stars.vert"},

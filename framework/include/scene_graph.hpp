@@ -4,6 +4,7 @@
 #include <memory>
 #include "node.hpp"
 #include "camera_node.hpp"
+#include "point_light_node.hpp"
 
 class SceneGraph {
   public:
@@ -29,6 +30,8 @@ class SceneGraph {
      * TODO: replace with multi camera system
      */
     std::shared_ptr<CameraNode> camera = nullptr;
+
+    std::shared_ptr<PointLightNode> light = nullptr;
 
   private:
     /**
