@@ -19,6 +19,10 @@ void GeometryNode::setGeometry(const model &newGeometry) {
   geometry = std::make_shared<model>(newGeometry);
 }
 
+void GeometryNode::setGeometry(const std::shared_ptr<model> &newGeometry) {
+  geometry = newGeometry;
+}
+
 glm::vec3 GeometryNode::getColor() const {
   return color;
 }

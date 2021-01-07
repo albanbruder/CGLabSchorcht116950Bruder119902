@@ -74,16 +74,25 @@ void ApplicationSolar::initializeObjects(){
   auto neptun = std::make_shared<GeometryNode>(GeometryNode("neptun", 45.0f, glm::vec3{119.0f/255.0f, 110.0f/255.0f, 1.0f}));
   auto moon = std::make_shared<GeometryNode>(GeometryNode("moon", 5.0f, glm::vec3{141.0f/255.0f, 141.0f/255.0f, 141.0f/255.0f}));
 
-  sun->setGeometry(model_loader::obj(m_resource_path + "models/sun.obj", model::NORMAL));
-  mercury->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  venus->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  earth->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  mars->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  jupiter->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  saturn->setGeometry(model_loader::obj(m_resource_path + "models/saturn.obj", model::NORMAL));
-  uranus->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  neptun->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-  moon->setGeometry(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  /**
+   * Load & set planet models
+   */
+
+  // load models
+  auto sunModel = std::make_shared<model>(model_loader::obj(m_resource_path + "models/sun.obj", model::NORMAL));
+  auto sphereModel = std::make_shared<model>(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
+  auto saturnModel = std::make_shared<model>(model_loader::obj(m_resource_path + "models/saturn.obj", model::NORMAL));
+
+  sun->setGeometry(sunModel);
+  mercury->setGeometry(sphereModel);
+  venus->setGeometry(sphereModel);
+  earth->setGeometry(sphereModel);
+  mars->setGeometry(sphereModel);
+  jupiter->setGeometry(sphereModel);
+  saturn->setGeometry(saturnModel);
+  uranus->setGeometry(sphereModel);
+  neptun->setGeometry(sphereModel);
+  moon->setGeometry(sphereModel);
 
   root->addChildren(sun);
   root->addChildren(mercury);
@@ -257,21 +266,15 @@ void ApplicationSolar::initializeShaderPrograms() {
 // load models
 void ApplicationSolar::initializeGeometry() {
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
+    if (planet->getName() == "camera") {
+      continue;
+    }
+
     planet_objects.emplace(planet->getName(), model_object{});
 
-    //std::shared_ptr<model> planet_model = std::static_pointer_cast<GeometryNode>(planet)->getGeometry(); 
-    std::shared_ptr<model> planet_model;
-    if (planet->getName() == "saturn") {
-      planet_model= std::make_shared<model>(model_loader::obj(m_resource_path + "models/saturn.obj", model::NORMAL));
-    }
-    else if (planet->getName() == "sun") {
-      planet_model= std::make_shared<model>(model_loader::obj(m_resource_path + "models/sun.obj", model::NORMAL));
-    }
-    else
-    {
-      planet_model= std::make_shared<model>(model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL));
-    }
-    
+    std::shared_ptr<GeometryNode> gPlanet = std::static_pointer_cast<GeometryNode>(planet);
+    std::shared_ptr<model> planet_model = gPlanet->getGeometry();
+
     // generate vertex array object
     glGenVertexArrays(1, &(planet_objects.at(planet->getName())).vertex_AO);
     // bind the array for attaching buffers

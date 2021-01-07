@@ -24,6 +24,11 @@ class GeometryNode : public Node {
     void setGeometry(const model &newGeometry);
 
     /**
+     * Set the geometry model of this node
+     */
+    void setGeometry(const std::shared_ptr<model> &newGeometry);
+
+    /**
      * Get the color of this node
      */
     glm::vec3 getColor() const;
