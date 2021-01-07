@@ -120,7 +120,7 @@ void ApplicationSolar::render() const {
 
   for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
     // bind shader to upload uniforms
-    glUseProgram(m_shaders.at(planet->getName() + "-orbit").handle);
+    glUseProgram(m_shaders.at("orbit").handle);
     // bind the VAO to draw
     glBindVertexArray(orbit_objects.at(planet->getName()).vertex_AO);
     
@@ -136,7 +136,7 @@ void ApplicationSolar::render() const {
     std::shared_ptr<GeometryNode> gPlanet = std::static_pointer_cast<GeometryNode>(planet);
 
     // bind shader to upload uniforms
-    glUseProgram(m_shaders.at(planet->getName()).handle);
+    glUseProgram(m_shaders.at("planet").handle);
 
     // rotate from parent transformation matrix
     planet->setLocalTransform(glm::rotate(planet->getParent()->getLocalTransform(), float(planet->getSpeed()/100.0f*glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
@@ -154,23 +154,23 @@ void ApplicationSolar::render() const {
 
     // translate according to radius
     planet->setLocalTransform(glm::translate(planet->getLocalTransform(), glm::fvec3{0.0f, 0.0f, planet->getOrbit()}));
-    glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ModelMatrix"),
+    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(planet->getLocalTransform()));
 
     // extra matrix for normal transformation to keep them orthogonal to surface
     planet->setWorldTransform(glm::inverseTranspose(glm::inverse(graph.camera->getLocalTransform()) * planet->getLocalTransform()));
-    glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("NormalMatrix"),
+    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
                       1, GL_FALSE, glm::value_ptr(planet->getWorldTransform()));
     
     // bind the VAO to draw
     glBindVertexArray(planet_objects.at(planet->getName()).vertex_AO);
 
     // color vertex
-    glUniform3f(m_shaders.at(planet->getName()).u_locs.at("ColorVertex"), gPlanet->getColor().r, gPlanet->getColor().g, gPlanet->getColor().b);
+    glUniform3f(m_shaders.at("planet").u_locs.at("ColorVertex"), gPlanet->getColor().r, gPlanet->getColor().g, gPlanet->getColor().b);
 
     // camera position
     auto cameraPos = (graph.camera->getLocalTransform() * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
-    glUniform3f(m_shaders.at(planet->getName()).u_locs.at("CameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
+    glUniform3f(m_shaders.at("planet").u_locs.at("CameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
 
     // draw bound vertex array using bound shader
     glDrawElements(planet_objects.at(planet->getName()).draw_mode, planet_objects.at(planet->getName()).num_elements, model::INDEX.type, NULL);
@@ -182,34 +182,31 @@ void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be inverted
   glm::fmat4 view_matrix = glm::inverse(graph.camera->getLocalTransform());
   // upload matrix to gpu
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
-    // bind shader to which to upload unforms
-    glUseProgram(m_shaders.at(planet->getName()).handle);
-    glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ViewMatrix"),
-                      1, GL_FALSE, glm::value_ptr(view_matrix));
-  }
+
+  // bind shader to which to upload unform
+  glUseProgram(m_shaders.at("planet").handle);
+  glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+                    1, GL_FALSE, glm::value_ptr(view_matrix));
+
+
   glUseProgram(m_shaders.at("stars").handle);
   glUniformMatrix4fv(m_shaders.at("stars").u_locs.at("ViewMatrix"),
                      1, GL_FALSE, glm::value_ptr(view_matrix)); 
 
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
-    // bind shader to upload uniforms
-    glUseProgram(m_shaders.at(planet->getName() + "-orbit").handle);
+  // bind shader to upload uniforms
+  glUseProgram(m_shaders.at("orbit").handle);
 
-    glUniformMatrix4fv(m_shaders.at(planet->getName() + "-orbit").u_locs.at("ViewMatrix"),
-                      1, GL_FALSE, glm::value_ptr(view_matrix)); 
-  }
+  glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ViewMatrix"),
+                    1, GL_FALSE, glm::value_ptr(view_matrix)); 
 
 }
 
 void ApplicationSolar::uploadProjection() {
   // upload matrix to gpu
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
-    // bind shader to which to upload unforms
-    glUseProgram(m_shaders.at(planet->getName()).handle);
-    glUniformMatrix4fv(m_shaders.at(planet->getName()).u_locs.at("ProjectionMatrix"),
-                      1, GL_FALSE, glm::value_ptr(graph.camera->getProjectionMatrix()));
-  }
+  // bind shader to which to upload unforms
+  glUseProgram(m_shaders.at("planet").handle);
+  glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
+                    1, GL_FALSE, glm::value_ptr(graph.camera->getProjectionMatrix()));
 
   // handle star shaders
   glUseProgram(m_shaders.at("stars").handle);
@@ -217,11 +214,9 @@ void ApplicationSolar::uploadProjection() {
                      1, GL_FALSE, glm::value_ptr(graph.camera->getProjectionMatrix()));     
 
   // handle orbit shaders
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
-    glUseProgram(m_shaders.at(planet->getName() + "-orbit").handle);
-    glUniformMatrix4fv(m_shaders.at(planet->getName() + "-orbit").u_locs.at("ProjectionMatrix"),
-                      1, GL_FALSE, glm::value_ptr(graph.camera->getProjectionMatrix()));    
-  }
+  glUseProgram(m_shaders.at("orbit").handle);
+  glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ProjectionMatrix"),
+                    1, GL_FALSE, glm::value_ptr(graph.camera->getProjectionMatrix()));  
 }
 
 // update uniform locations
@@ -235,18 +230,16 @@ void ApplicationSolar::uploadUniforms() {
 ///////////////////////////// intialisation functions /////////////////////////
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList(true)) {
-    // store shader program objects in container
-    m_shaders.emplace(planet->getName(), shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/simple.vert"},
+  // store shader program objects in container
+    m_shaders.emplace("planet", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/simple.vert"},
                                             {GL_FRAGMENT_SHADER, m_resource_path + "shaders/simple.frag"}}});
     // request uniform locations for shader program
-    m_shaders.at(planet->getName()).u_locs["NormalMatrix"] = -1;
-    m_shaders.at(planet->getName()).u_locs["ModelMatrix"] = -1;
-    m_shaders.at(planet->getName()).u_locs["ViewMatrix"] = -1;
-    m_shaders.at(planet->getName()).u_locs["ProjectionMatrix"] = -1;
-    m_shaders.at(planet->getName()).u_locs["ColorVertex"] = -1;
-    m_shaders.at(planet->getName()).u_locs["CameraPosition"] = -1;
-  }
+    m_shaders.at("planet").u_locs["NormalMatrix"] = -1;
+    m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
+    m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
+    m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+    m_shaders.at("planet").u_locs["ColorVertex"] = -1;
+    m_shaders.at("planet").u_locs["CameraPosition"] = -1;
 
   // create star shader
   m_shaders.emplace("stars", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/stars.vert"},
@@ -255,12 +248,10 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("stars").u_locs["ProjectionMatrix"] = -1;  
 
   // create orbit shaders
-  for(std::shared_ptr<Node> planet : graph.getRoot()->getChildrenList()) {
-    m_shaders.emplace(planet->getName() + "-orbit", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/stars.vert"},
+  m_shaders.emplace("orbit", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/stars.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/stars.frag"}}});
-    m_shaders.at(planet->getName() + "-orbit").u_locs["ViewMatrix"] = -1;
-    m_shaders.at(planet->getName() + "-orbit").u_locs["ProjectionMatrix"] = -1;  
-  }
+  m_shaders.at("orbit").u_locs["ViewMatrix"] = -1;
+  m_shaders.at("orbit").u_locs["ProjectionMatrix"] = -1;  
 }
 
 // load models
