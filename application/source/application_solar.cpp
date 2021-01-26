@@ -36,13 +36,18 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,orbit_containers{}
  ,graph{}
 {
+  static GLuint textureName;
+  glGenTextures(1, &textureName);
+  glBindTexture(GL_TEXTURE_2D, textureName);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
   initializeObjects();
   initializeGeometry();  
   initalizeStars();
   initalizeOrbits();
   initializeShaderPrograms();
-  
-  
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -198,13 +203,6 @@ void ApplicationSolar::render() const {
 
     if (shader == "planet" || shader == "sun") {
       // bind the texture
-      static GLuint textureName;
-      glGenTextures(1, &textureName);
-      glBindTexture(GL_TEXTURE_2D, textureName);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-
       auto pixelData = gPlanet->getTexture();
 
       glTexImage2D(GL_TEXTURE_2D, 0, 
