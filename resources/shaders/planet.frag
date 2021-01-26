@@ -25,8 +25,8 @@ void main() {
   float specularStrength = 0.5;
   float specularExponent = 128;
   vec3 viewDir = normalize(CameraPosition - WorldSpacePosition);
-  vec3 reflectDir = reflect(-lightDirection, normal);
-  float spec = pow(max(dot(viewDir, reflectDir), 0.0), specularExponent);
+  vec3 halfDir = normalize(lightDirection + viewDir);
+  float spec = pow(max(dot(halfDir, normal), 0.0), specularExponent);
   vec3 specularColor = LightColor * specularStrength * spec;
 
   vec3 combinedColor = LightIntensity * (ambientColor + diffuseColor + specularColor) * ColorVertex;
