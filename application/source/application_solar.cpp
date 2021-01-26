@@ -6,6 +6,7 @@
 #include "model_loader.hpp"
 #include "geometry_node.hpp"
 #include "camera_node.hpp"
+#include "texture_loader.hpp"
 
 #include <glbinding/gl/gl.h>
 // use gl definitions from glbinding 
@@ -99,6 +100,17 @@ void ApplicationSolar::initializeObjects(){
   neptun->setGeometry(sphereModel);
   moon->setGeometry(sphereModel);
 
+  sun->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/sun.png")));
+  mercury->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/mercury.png")));
+  venus->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/venus.png")));
+  earth->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/earth.png")));
+  mars->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/mars.png")));
+  jupiter->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/jupiter.png")));
+  saturn->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/saturn.png")));
+  uranus->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/uranus.png")));
+  neptun->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/neptun.png")));
+  moon->setTexture(std::make_shared<pixel_data>(texture_loader::file("/home/alban/git/CGLabSchorcht116950Bruder119902/resources/textures/moon.png")));
+
   root->addChildren(sun);
   root->addChildren(mercury);
   root->addChildren(venus);
@@ -183,6 +195,27 @@ void ApplicationSolar::render() const {
     
     // bind the VAO to draw
     glBindVertexArray(planet_objects.at(planet->getName()).vertex_AO);
+
+    if (shader == "planet" || shader == "sun") {
+      // bind the texture
+      static GLuint textureName;
+      glGenTextures(1, &textureName);
+      glBindTexture(GL_TEXTURE_2D, textureName);
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
+      auto pixelData = gPlanet->getTexture();
+
+      glTexImage2D(GL_TEXTURE_2D, 0, 
+        pixelData->channels, 
+        pixelData->width, 
+        pixelData->height, 
+        0, 
+        pixelData->channels, 
+        pixelData->channel_type, 
+        pixelData->ptr());
+    }
 
     if (shader == "planet") {
       // color vertex
@@ -271,6 +304,7 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at("sun").u_locs["ModelMatrix"] = -1;
     m_shaders.at("sun").u_locs["ViewMatrix"] = -1;
     m_shaders.at("sun").u_locs["ProjectionMatrix"] = -1;
+    m_shaders.at("sun").u_locs["Texture"] = -1;
 
     m_shaders.emplace("planet", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/planet.vert"},
                                             {GL_FRAGMENT_SHADER, m_resource_path + "shaders/planet.frag"}}});
@@ -284,6 +318,7 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at("planet").u_locs["LightColor"] = -1;
     m_shaders.at("planet").u_locs["LightPosition"] = -1;
     m_shaders.at("planet").u_locs["LightIntensity"] = -1;
+    m_shaders.at("planet").u_locs["Texture"] = -1;
 
   // create star shader
   m_shaders.emplace("stars", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/stars.vert"},

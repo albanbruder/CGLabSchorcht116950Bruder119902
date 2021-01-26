@@ -1,8 +1,14 @@
 #version 150
 
+in  vec4 pass_TextureCoord;
 in  vec3 pass_Normal;
 out vec4 out_Color;
 
+uniform sampler2D Texture;
+
 void main() {
-  out_Color = vec4(vec3(1.0, 1.0, 0.1) * 0.8  + abs(normalize(pass_Normal)) * 0.2, 1.0);
+  vec2 texelCoord = vec2((atan(pass_TextureCoord.y, pass_TextureCoord.x) / 3.1415926 + 1.0) * 0.5,
+                                (asin(pass_TextureCoord.z) / 3.1415926 + 0.5));
+
+  out_Color = texture2D(Texture, texelCoord);
 }

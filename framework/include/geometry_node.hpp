@@ -4,6 +4,7 @@
 #include "node.hpp"
 #include "model.hpp"
 #include <memory>
+#include "texture_loader.hpp"
 
 class GeometryNode : public Node {
   public:
@@ -37,6 +38,16 @@ class GeometryNode : public Node {
      * Set the color of this node
      */
     void setColor(glm::vec3 newColor);
+
+    /**
+     * Get the texture of this node
+     */
+    std::shared_ptr<pixel_data> getTexture() const;
+
+    /**
+     * Set the texture of this node
+     */
+    void setTexture(std::shared_ptr<pixel_data> newColor);
     
   private:
     // geometry model of the node
@@ -44,6 +55,8 @@ class GeometryNode : public Node {
 
     // color of the node
     glm::vec3 color;
+
+    std::shared_ptr<pixel_data> texture;
 };
 
 #endif

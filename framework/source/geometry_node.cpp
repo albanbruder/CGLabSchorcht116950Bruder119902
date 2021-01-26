@@ -30,3 +30,11 @@ glm::vec3 GeometryNode::getColor() const {
 void GeometryNode::setColor(glm::vec3 newColor) {
   color = newColor;
 }
+
+std::shared_ptr<pixel_data> GeometryNode::getTexture() const {
+  return texture;
+}
+
+void GeometryNode::setTexture(std::shared_ptr<pixel_data> newTexture) {
+  texture = newTexture;
+}

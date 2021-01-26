@@ -2,6 +2,7 @@
 
 in  vec3 WorldSpaceNormal;
 in vec3 WorldSpacePosition;
+in  vec4 pass_TextureCoord;
 out vec4 out_Color;
 
 uniform float LightIntensity;
@@ -9,8 +10,14 @@ uniform vec3 LightColor;
 uniform vec3 LightPosition;
 uniform vec3 ColorVertex;
 uniform vec3 CameraPosition;
+uniform sampler2D Texture;
 
 void main() {
+  vec2 texelCoord = vec2((atan(pass_TextureCoord.y, pass_TextureCoord.x) / 3.1415926 + 1.0) * 0.5,
+                                (asin(pass_TextureCoord.z) / 3.1415926 + 0.5));
+
+  vec4 color = texture2D(Texture, texelCoord);
+  
   // ambient component
   float ambientStrength = 0.1;
   vec3 ambientColor = LightColor * ambientStrength;
@@ -29,7 +36,7 @@ void main() {
   float spec = pow(max(dot(halfDir, normal), 0.0), specularExponent);
   vec3 specularColor = LightColor * specularStrength * spec;
 
-  vec3 combinedColor = LightIntensity * (ambientColor + diffuseColor + specularColor) * ColorVertex;
+  vec3 combinedColor = LightIntensity * (ambientColor + diffuseColor + specularColor) * vec3(color.x, color.y, color.z);
 
   out_Color = vec4(combinedColor, 1.0);
 }
