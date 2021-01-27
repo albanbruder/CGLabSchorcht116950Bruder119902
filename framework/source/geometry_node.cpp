@@ -11,15 +11,11 @@ GeometryNode::GeometryNode(std::string name, float orbit)
 GeometryNode::GeometryNode(std::string name, float orbit, glm::vec3 color) 
   : Node{name, orbit}, color{color} {}
 
-std::shared_ptr<model> GeometryNode::getGeometry() const {
+std::shared_ptr<model_object> GeometryNode::getGeometry() const {
   return geometry;
 }
 
-void GeometryNode::setGeometry(const model &newGeometry) {
-  geometry = std::make_shared<model>(newGeometry);
-}
-
-void GeometryNode::setGeometry(const std::shared_ptr<model> &newGeometry) {
+void GeometryNode::setGeometry(const std::shared_ptr<model_object> &newGeometry) {
   geometry = newGeometry;
 }
 
@@ -31,10 +27,18 @@ void GeometryNode::setColor(glm::vec3 newColor) {
   color = newColor;
 }
 
-std::shared_ptr<pixel_data> GeometryNode::getTexture() const {
+std::shared_ptr<texture_object> GeometryNode::getTexture() const {
   return texture;
 }
 
-void GeometryNode::setTexture(std::shared_ptr<pixel_data> newTexture) {
+void GeometryNode::setTexture(std::shared_ptr<texture_object> newTexture) {
   texture = newTexture;
+}
+
+float GeometryNode::getScale() const {
+  return scale;
+}
+
+void GeometryNode::setScale(float newScale) {
+  scale = newScale;
 }

@@ -4,7 +4,7 @@
 #include "node.hpp"
 #include "model.hpp"
 #include <memory>
-#include "texture_loader.hpp"
+#include "structs.hpp"
 
 class GeometryNode : public Node {
   public:
@@ -17,17 +17,12 @@ class GeometryNode : public Node {
     /**
      * Get the geometry model of this node
      */
-    std::shared_ptr<model> getGeometry() const;
+    std::shared_ptr<model_object> getGeometry() const;
 
     /**
      * Set the geometry model of this node
      */
-    void setGeometry(const model &newGeometry);
-
-    /**
-     * Set the geometry model of this node
-     */
-    void setGeometry(const std::shared_ptr<model> &newGeometry);
+    void setGeometry(const std::shared_ptr<model_object> &newGeometry);
 
     /**
      * Get the color of this node
@@ -42,21 +37,33 @@ class GeometryNode : public Node {
     /**
      * Get the texture of this node
      */
-    std::shared_ptr<pixel_data> getTexture() const;
+    std::shared_ptr<texture_object> getTexture() const;
 
     /**
      * Set the texture of this node
      */
-    void setTexture(std::shared_ptr<pixel_data> newColor);
+    void setTexture(std::shared_ptr<texture_object> newColor);
+
+    /**
+     * Get the scale of this node
+     */
+    float getScale() const;
+
+    /**
+     * Set the scale of this node
+     */
+    void setScale(float newScale);
     
   private:
     // geometry model of the node
-    std::shared_ptr<model> geometry;
+    std::shared_ptr<model_object> geometry;
 
     // color of the node
     glm::vec3 color;
 
-    std::shared_ptr<pixel_data> texture;
+    std::shared_ptr<texture_object> texture;
+
+    float scale = 1.0f;
 };
 
 #endif
