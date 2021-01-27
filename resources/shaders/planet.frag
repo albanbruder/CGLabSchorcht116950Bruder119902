@@ -8,7 +8,6 @@ out vec4 out_Color;
 uniform float LightIntensity;
 uniform vec3 LightColor;
 uniform vec3 LightPosition;
-uniform vec3 ColorVertex;
 uniform vec3 CameraPosition;
 uniform sampler2D Texture;
 

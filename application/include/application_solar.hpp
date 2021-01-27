@@ -39,20 +39,21 @@ class ApplicationSolar : public Application {
   void initalizeOrbits();
   void initializeSkybox();
 
+  std::shared_ptr<GeometryNode> createOrbit(std::shared_ptr<GeometryNode> const& planet) const;
+
   // cpu representation of model
   std::map<std::string, std::shared_ptr<model_object>> objects{};
-  model_object planet_object;
+  
   model_object star_object;
-  GLuint skybox_AO = 0;
-  std::map<std::string, model_object> orbit_objects{};
   std::vector<GLfloat> star_container;
-  std::map<std::string, std::vector<GLfloat>> orbit_containers;
+  
   //SceneGraph
   SceneGraph graph;
+
   //Shift Speed multiplier
   float multiplier=1.0f;
+
   texture_object skyboxTexture;
-  unsigned int planetTexture;
 };
 
 #endif

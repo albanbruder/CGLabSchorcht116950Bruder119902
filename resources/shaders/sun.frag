@@ -1,7 +1,6 @@
 #version 150
 
 in  vec4 pass_TextureCoord;
-in  vec3 pass_Normal;
 out vec4 out_Color;
 
 uniform sampler2D Texture;
