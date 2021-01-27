@@ -29,14 +29,26 @@ using namespace gl;
 #include <string>
 #include <vector>
 
-texture_object loadCubemap(std::vector<std::string> faces) {
+/**
+ * Loads the skybox texture using 6 "sky" images
+ */
+texture_object loadSkyboxTexture() {
+    std::vector<std::string> parts{
+        "sky1.png",
+        "sky2.png",
+        "sky4.png",
+        "sky3.png",
+        "sky5.png",
+        "sky6.png"
+    };
+
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-    for (unsigned int i = 0; i < faces.size(); i++)
+    for (unsigned int i = 0; i < parts.size(); i++)
     {
-        auto pixelData = texture_loader::file("../resources/textures/" + faces[i]);
+        auto pixelData = texture_loader::file("../resources/textures/" + parts[i]);
 
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 
           pixelData.channels, 
@@ -61,7 +73,10 @@ texture_object loadCubemap(std::vector<std::string> faces) {
     return texture;
 }
 
-texture_object loadSpheremap(std::string map) {
+/**
+ * Loads the sphere texture using the given map
+ */
+texture_object loadSphereTexture(std::string map) {
   auto texture = texture_object{};
   texture.target = GL_TEXTURE_2D;
 
@@ -83,6 +98,9 @@ texture_object loadSpheremap(std::string map) {
   return texture;
 }
 
+/**
+ * Generates box vertices with edge length s
+ */
 std::vector<float> generateBoxVertices(float s) {
   return std::vector<float> {
     -s, s, s,
@@ -143,15 +161,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,orbit_containers{}
  ,graph{}
 {
-  std::vector<std::string> faces{
-      "sky1.png",
-      "sky2.png",
-      "sky4.png",
-      "sky3.png",
-      "sky5.png",
-      "sky6.png"
-  };
-  skyboxTexture = loadCubemap(faces);
+  skyboxTexture = loadSkyboxTexture();
 
   initializeGeometry();  
   initializeObjects();
@@ -209,16 +219,16 @@ void ApplicationSolar::initializeObjects(){
   neptun->setGeometry(objects.at("sphere"));
   moon->setGeometry(objects.at("sphere"));
 
-  sun->setTexture(std::make_shared<texture_object>(loadSpheremap("sun.png")));
-  mercury->setTexture(std::make_shared<texture_object>(loadSpheremap("mercury.png")));
-  earth->setTexture(std::make_shared<texture_object>(loadSpheremap("earth.png")));
-  venus->setTexture(std::make_shared<texture_object>(loadSpheremap("venus.png")));
-  mars->setTexture(std::make_shared<texture_object>(loadSpheremap("mars.png")));
-  jupiter->setTexture(std::make_shared<texture_object>(loadSpheremap("jupiter.png")));
-  saturn->setTexture(std::make_shared<texture_object>(loadSpheremap("saturn.png")));
-  uranus->setTexture(std::make_shared<texture_object>(loadSpheremap("uranus.png")));
-  neptun->setTexture(std::make_shared<texture_object>(loadSpheremap("neptun.png")));
-  moon->setTexture(std::make_shared<texture_object>(loadSpheremap("moon.png")));
+  sun->setTexture(std::make_shared<texture_object>(loadSphereTexture("sun.png")));
+  mercury->setTexture(std::make_shared<texture_object>(loadSphereTexture("mercury.png")));
+  earth->setTexture(std::make_shared<texture_object>(loadSphereTexture("earth.png")));
+  venus->setTexture(std::make_shared<texture_object>(loadSphereTexture("venus.png")));
+  mars->setTexture(std::make_shared<texture_object>(loadSphereTexture("mars.png")));
+  jupiter->setTexture(std::make_shared<texture_object>(loadSphereTexture("jupiter.png")));
+  saturn->setTexture(std::make_shared<texture_object>(loadSphereTexture("saturn.png")));
+  uranus->setTexture(std::make_shared<texture_object>(loadSphereTexture("uranus.png")));
+  neptun->setTexture(std::make_shared<texture_object>(loadSphereTexture("neptun.png")));
+  moon->setTexture(std::make_shared<texture_object>(loadSphereTexture("moon.png")));
 
   root->addChildren(sun);
   root->addChildren(mercury);
