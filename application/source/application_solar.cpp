@@ -788,6 +788,8 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
   graph.camera->setProjectionMatrix(utils::calculate_projection_matrix(float(width) / float(height)));
   // upload new projection matrix
   uploadProjection();
+
+  initializeFramebuffer();
 }
 
 void ApplicationSolar::initalizeStars(){
