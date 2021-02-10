@@ -25,6 +25,7 @@ class ApplicationSolar : public Application {
   void render() const;
 
  protected:
+  void initializeFramebuffer();
   void initializeShaderPrograms();
   void initializeGeometry();
   // add al objects and root
@@ -54,6 +55,16 @@ class ApplicationSolar : public Application {
   float multiplier=1.0f;
 
   texture_object skyboxTexture;
+
+  // window size
+  unsigned windowWidth = 640u;
+  unsigned windowHeight = 480u;
+
+  // frame buffer
+  unsigned int FBO;
+  unsigned int FBO_texture;
+  // render buffer
+  unsigned int RBO;
 };
 
 #endif

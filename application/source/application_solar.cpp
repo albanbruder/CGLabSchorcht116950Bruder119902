@@ -159,6 +159,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,star_container{}
  ,graph{}
 {
+  initializeFramebuffer();
+
   skyboxTexture = loadSkyboxTexture();
 
   initializeGeometry();  
@@ -185,6 +187,34 @@ std::shared_ptr<GeometryNode> ApplicationSolar::createOrbit(std::shared_ptr<Geom
   orbit->setParent(parent);
 
   return orbit;
+}
+
+void ApplicationSolar::initializeFramebuffer() {
+  // generate and bind the framebuffer
+  glGenFramebuffers(1, &FBO);
+  glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+  // generate and bind the framebuffer texture
+  glGenTextures(1, &FBO_texture);
+  glBindTexture(GL_TEXTURE_2D, FBO_texture);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+
+  // attach the texture to the framebuffer
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FBO_texture, 0);
+
+  // initialize depth renderbuffer
+  glGenRenderbuffers(1, &RBO);
+  glBindRenderbuffer(GL_RENDERBUFFER, RBO);  
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, windowWidth, windowHeight);
+
+  // attach the renderbuffer to the framebuffer
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, RBO);
 }
 
 void ApplicationSolar::initializeObjects(){
@@ -277,6 +307,11 @@ void ApplicationSolar::initializeObjects(){
 }
 
 void ApplicationSolar::render() const {
+  // bind and clear the framebuffer
+  glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+
   /**
    * Render skybox
    */
@@ -413,7 +448,28 @@ void ApplicationSolar::render() const {
       glDrawElements(gPlanet->getGeometry()->draw_mode, gPlanet->getGeometry()->num_elements, model::INDEX.type, NULL);
     }
   }
+
+  /**
+   * Rendering the framebuffer
+   */
   
+  // bind the default framebuffer
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  // clear color and depth date in the default buffer
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // bind buffer shader
+  glUseProgram(m_shaders.at("buffer").handle);
+
+  // bind quad vertices
+  glBindVertexArray(objects.at("buffer")->vertex_AO);
+
+  // render the buffer
+  glBindTexture(GL_TEXTURE_2D, FBO_texture);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void ApplicationSolar::uploadView() {
@@ -486,6 +542,11 @@ void ApplicationSolar::uploadUniforms() {
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
   // store shader program objects in container
+
+    // buffer shader
+    m_shaders.emplace("buffer", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/buffer.vert"},
+                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/buffer.frag"}}});
+
     // sky box shader
     m_shaders.emplace("skybox", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/skybox.vert"},
                                             {GL_FRAGMENT_SHADER, m_resource_path + "shaders/skybox.frag"}}});
@@ -533,6 +594,38 @@ void ApplicationSolar::initializeShaderPrograms() {
 
 // load models
 void ApplicationSolar::initializeGeometry() {
+  /**
+   * Initialize buffer object
+   */
+  float bufferVertices[] = {
+    -1.0f,  1.0f, 1.0f, 1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f, 1.0f, 1.0f,  1.0f, -1.0f,
+  };
+
+  objects.emplace("buffer", std::make_shared<model_object>());
+
+  // generate vertex array object
+  glGenVertexArrays(1, &(objects.at("buffer")->vertex_AO));
+  // bind the array for attaching buffers
+  glBindVertexArray(objects.at("buffer")->vertex_AO);
+
+  // generate generic buffer
+  glGenBuffers(1, &(objects.at("buffer")->vertex_BO));
+  // bind this as an vertex array buffer containing all attributes
+  glBindBuffer(GL_ARRAY_BUFFER, objects.at("buffer")->vertex_BO);
+  // configure currently bound array buffer
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, bufferVertices, GL_STATIC_DRAW);
+
+  // activate first attribute on gpu
+  glEnableVertexAttribArray(0);
+  // first attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+  
+  // store type of primitive to draw
+  objects.at("buffer")->draw_mode = GL_TRIANGLES;
+  // transfer number of indices to model object 
+  objects.at("buffer")->num_elements = GLsizei(6);
+
   /**
    * Initialize skybox object
    */
@@ -688,6 +781,9 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
 
 //handle resizing
 void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
+  windowWidth = width;
+  windowHeight = height;
+
   // recalculate projection matrix for new aspect ration
   graph.camera->setProjectionMatrix(utils::calculate_projection_matrix(float(width) / float(height)));
   // upload new projection matrix
